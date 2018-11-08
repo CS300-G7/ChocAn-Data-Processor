@@ -59,15 +59,16 @@ void get_up_char(char& input) {
     input = toupper(input);
 }
 
-void get_date(char& input) {
+void get_date(char* input) {
 
 	char MM[2];
 	char DD[2];
 	char YYYY[4];
 	bool done = false;
+	char * ptr;
 
 	do {
-		cout << "Enter month (MM): "
+		cout << "Enter month (MM): ";
 		get_string(MM, 2);
 
 		if (MM[0] == '0') 					// check 01-09
@@ -79,8 +80,9 @@ void get_date(char& input) {
 
 	} while (!done);
 	done = false;
-	 
-	strcpy(input, MM);
+	
+	ptr = &MM[0]; // required for strcpy to work
+	strcpy(input, ptr);
 	strcat(input, "-");
 	
 	do{
@@ -99,7 +101,8 @@ void get_date(char& input) {
 	} while (!done);
 	done = false;
 
-	strcat(input, DD);
+	ptr = &DD[0];
+	strcat(input, ptr);
 	strcat(input, "-");
 
 	do {
@@ -115,7 +118,9 @@ void get_date(char& input) {
 	} while (!done);
 	done = false;
 
-	strcat(input, YYYY);
+	ptr = &YYYY[0];	
+	strcat(input, ptr);
+
 }
 
 

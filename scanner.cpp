@@ -34,6 +34,17 @@ void get_int(int& input, int min, int max) {
 	}
 }
 
+void get_digits(int& input, int num_digits) {
+	int divisor = 1;
+	for (int i = 1; i < num_digits; ++i) divisor *= 10;
+	
+	cin >> input;
+	while (input/divisor >= 10 || input/divisor < 1) {
+		cout << "Invalid entry. Enter a " << num_digits << "-digit number: ";
+		cin >> input;
+	} 
+}
+
 void get_pos_int(int& input) {
 	cin >> input;
 	while (input <= 0) {
@@ -47,6 +58,66 @@ void get_up_char(char& input) {
     cin.ignore(100, '\n'); 
     input = toupper(input);
 }
+
+void get_date(char& input) {
+
+	char MM[2];
+	char DD[2];
+	char YYYY[4];
+	bool done = false;
+
+	do {
+		cout << "Enter month (MM): "
+		get_string(MM, 2);
+
+		if (MM[0] == '0') 					// check 01-09
+			if (MM[1] > '0' && MM[1] <= '9') done = true;
+		if (MM[0] == '1') 					// check 10-12
+			if (MM[1] >= '0' && MM[1] <= '2') done = true;
+
+		if (!done) cout << "Invalid entry. ";
+
+	} while (!done);
+	done = false;
+	 
+	strcpy(input, MM);
+	strcat(input, "-");
+	
+	do{
+		cout << "Enter day (DD): ";
+		get_string(DD, 2);
+
+		if (DD[0] == '0') 					// check 01-09
+			if (DD[1] > '0' && DD[1] <= '9') done = true;
+		if (DD[0] == '1' || DD[0] == '2') 	// check 10-29
+			if (DD[1] > '0' && DD[1] <= '9') done = true;
+		if (DD[0] == '3') 					// check 30-31
+			if (DD[1] == '0' || DD[1] == '1') done = true;
+
+		if (!done) cout << "Invalid entry. ";
+
+	} while (!done);
+	done = false;
+
+	strcat(input, DD);
+	strcat(input, "-");
+
+	do {
+		cout << "Enter year (YYYY): ";
+		get_string(YYYY, 4);
+
+		if (YYYY[0] == '2') done = true; // This should never != '2'
+		for (int i = 1; i <= 3; ++i) // Ensure rest of chars are digits
+			if (YYYY[i] < '0' || YYYY[i] > '9') done = false; 
+
+		if (!done) cout << "Invalid entry. ";
+
+	} while (!done);
+	done = false;
+
+	strcat(input, YYYY);
+}
+
 
 bool yes() {
 	char input;

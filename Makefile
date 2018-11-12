@@ -4,10 +4,14 @@ TARGET = dataproc
 INCLUDE = -I 
 SRC = 
 
-all:
-	${CXX} ${CXXFLAGS} ${INCLUDE} -o ${TARGET};
+datatest: data.o data_test.o
+	${CXX} -o datatest data.o data_test.o
 
-# Eventually all tests should be in their own directory.
-test:
-	${CXX} ${CXXFLAGS} -I ./tests tests/*.cpp -o tests/test;
+data.o: data.cpp data.h
+	${CXX} ${CXXFLAGS} -c data.cpp
 
+data_test.o: data_test.cpp
+	${CXX} ${CXXFLAGS} -c data_test.cpp	
+
+clean:
+	rm *.o

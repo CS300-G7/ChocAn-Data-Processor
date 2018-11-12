@@ -32,7 +32,7 @@ public:
 	bool addService(ServiceReport);
 	std::map<int, ServiceReport> getServices();
 	
-	/** Needed so that only weekly services are included in the report. */
+	/** Ensures that only weekly services are included in the report. */
 	void archiveServices();
 };
 

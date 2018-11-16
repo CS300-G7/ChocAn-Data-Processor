@@ -38,18 +38,30 @@ void testValidation()
 	member.IDNumber = id++;
 	v = data.addMember(member);
 	printf("Added member '%s' (%d)\n", member.Name, member.IDNumber);
+	if (!v) {
+		printf("Could not add member\n");
+		passed = false;
+	}
 
 	ProviderMember provider;
 	strcpy(provider.Name, "Bob");
 	provider.IDNumber = id++;
 	v = data.addProvider(provider);
 	printf("Added provider '%s' (%d)\n", provider.Name, provider.IDNumber);
+	if (!v) {
+		printf("Could not add provider\n");
+		passed = false;
+	}
 
 	ServiceCode code;
 	code.Code = 10;
-	strcpy(code.ServiceName, "Eating");
+	strcpy(code.ServiceName, "Random Service");
 	v = data.addServiceCode(code);
 	printf("Added service '%s' (%d)\n", code.ServiceName, code.Code);
+	if (!v) {
+		printf("Could not add service code\n");
+		passed = false;
+	}
 
 	ServiceReport report;
 	report.MemberNum = member.IDNumber;

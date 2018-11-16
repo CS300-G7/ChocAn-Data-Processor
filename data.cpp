@@ -8,13 +8,12 @@
 
 Data::Data()
 {
-	serviceid = 0;
+
 }
 
 bool Data::addMember(ProviderMember mem)
 {
-	members.emplace(mem.IDNumber, mem);
-	return true;
+	return members.emplace(mem.IDNumber, mem).second;
 }
 
 ProviderMember Data::getMember(int id)
@@ -24,8 +23,7 @@ ProviderMember Data::getMember(int id)
 
 bool Data::addProvider(ProviderMember mem)
 {
-	providers.emplace(mem.IDNumber, mem);
-	return true;
+	return providers.emplace(mem.IDNumber, mem).second;
 }
 
 ProviderMember Data::getProvider(int id)
@@ -33,10 +31,27 @@ ProviderMember Data::getProvider(int id)
 	return providers.at(id);
 }
 
+bool Data::removeMember(int id)
+{
+	if (members.find(id) != members.end()) {
+		removedMembers.push_back(id);
+		return true;
+	} else
+		return false;
+}
+
+bool Data::removeProvider(int id)
+{
+	if (providers.find(id) != providers.end()) {
+		removedProviders.push_back(id);
+		return true;
+	} else
+		return false;
+}
+
 bool Data::addServiceCode(ServiceCode code)
 {
-	serviceCodes.emplace(code.Code, code);
-	return true;
+	return serviceCodes.emplace(code.Code, code).second;
 }
 
 std::map<int, ServiceCode> Data::getServiceCodes()
@@ -52,11 +67,11 @@ bool Data::addService(ServiceReport service)
 		return false;
 	if (providers.find(service.ProviderNum) == providers.end())
 		return false; 
-	services.emplace(serviceid++, service);
+	services.push_back(service);
 	return true;
 }
 
-std::map<int, ServiceReport> Data::getServices()
+std::vector<ServiceReport> Data::getServices()
 {
 	return services;	
 }
@@ -64,5 +79,15 @@ std::map<int, ServiceReport> Data::getServices()
 void Data::archiveServices()
 {
 	services.clear();
+	while (!removedMembers.empty()) {
+		int id = removedMembers.back();
+		members.erase(id);
+		removedMembers.pop_back();
+	}
+	while(!removedProviders.empty()) {
+		int id = removedProviders.back();
+		providers.erase(id);
+		removedProviders.pop_back();
+	}
 }
 

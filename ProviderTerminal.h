@@ -6,7 +6,7 @@ class ProviderTerminal {
 
 	public:
 
-		ProviderTerminal();
+		ProviderTerminal(DataCenter&);
 
 		int ValidateMember();	
 		int ValidateProvider();	
@@ -18,11 +18,12 @@ class ProviderTerminal {
 		void LogMemberIn(int);
 		void LogMemberOut(int);
 		bool MemberLoggedIn(int);
+		int CheckProviderNum();
 
 		int ProviderNum;
-		int * MemberNum;	
+		int MemberNum[10];	
 		struct ServiceReport Report;
-		DataCenter * DC;	
+		DataCenter* DC;	
 };
 
 

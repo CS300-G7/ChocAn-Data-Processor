@@ -10,14 +10,15 @@
 #include "structs.h"
 #include <vector>
 #include <map>
-#include <set>
+#include <deque>
 
 class Data {
 	/* Pretend this is the database or something. */
 	std::map<int, ProviderMember> members;
 	std::map<int, ProviderMember> providers;
 	std::map<int, ServiceCode> serviceCodes;
-	std::vector<ServiceReport> services;
+	std::deque<std::map<int, ServiceReport>> services;
+	int serviceid;
 
 	/* List of members/providers to be deleted. */	
 	std::vector<int> removedMembers;
@@ -35,10 +36,10 @@ public:
 
 	bool addServiceCode(ServiceCode);
 	std::map<int, ServiceCode> getServiceCodes();
-	bool addService(ServiceReport);
-	std::vector<ServiceReport> getServices();
-	
-	/** Needed so that only weekly services are included in the report. */
+	int addService(ServiceReport);
+	std::map<int, ServiceReport> getServices(int);
+	bool removeService(int);	
+	/** Creates a new time period for the next report. */
 	void archiveServices();
 };
 

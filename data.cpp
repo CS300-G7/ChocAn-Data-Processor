@@ -8,12 +8,17 @@
 
 Data::Data()
 {
-
+	serviceid = 1;
+	services.push_front(std::map<int, ServiceReport>());
 }
 
 bool Data::addMember(ProviderMember mem)
 {
-	return members.emplace(mem.IDNumber, mem).second;
+	/* Member ID cannot be greater than nine digits. */
+	if (mem.IDNumber > 999999999)
+		return false;
+	members[mem.IDNumber] = mem;
+	return true;
 }
 
 ProviderMember Data::getMember(int id)
@@ -23,7 +28,11 @@ ProviderMember Data::getMember(int id)
 
 bool Data::addProvider(ProviderMember mem)
 {
-	return providers.emplace(mem.IDNumber, mem).second;
+	/* Provider ID cannot be greater than nine digits. */
+	if (mem.IDNumber > 999999999)
+		return false;
+	providers[mem.IDNumber] = mem;
+	return true;
 }
 
 ProviderMember Data::getProvider(int id)
@@ -51,6 +60,9 @@ bool Data::removeProvider(int id)
 
 bool Data::addServiceCode(ServiceCode code)
 {
+	/* Service code cannot be greater than six digits. */
+	if (code.Code > 999999)
+		return false;
 	return serviceCodes.emplace(code.Code, code).second;
 }
 
@@ -59,26 +71,40 @@ std::map<int, ServiceCode> Data::getServiceCodes()
 	return serviceCodes;
 }
 
-bool Data::addService(ServiceReport service)
+int Data::addService(ServiceReport service)
 {
 	if (serviceCodes.find(service.ServiceCode) == serviceCodes.end())
-		return false;
+		return -1;
 	if (members.find(service.MemberNum) == members.end())
-		return false;
+		return -1;
 	if (providers.find(service.ProviderNum) == providers.end())
-		return false; 
-	services.push_back(service);
-	return true;
+		return -1; 
+	services[0].emplace(serviceid, service);
+	return serviceid++;
 }
 
-std::vector<ServiceReport> Data::getServices()
+std::map<int, ServiceReport> Data::getServices(int period)
 {
-	return services;	
+	return services[period];
+}
+
+bool Data::removeService(int id)
+{
+	for (auto &period : services) {
+		auto it = period.find(id);
+		if (it != period.end()) {
+			period.erase(it);
+			return true;
+		}		
+	}
+	return false;
 }
 
 void Data::archiveServices()
 {
-	services.clear();
+	services.push_front(std::map<int, ServiceReport>());
+
+	/* Remove everything staged for removal. */
 	while (!removedMembers.empty()) {
 		int id = removedMembers.back();
 		members.erase(id);

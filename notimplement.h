@@ -1,0 +1,4 @@
+class DataCenter{
+    public:
+        DataCenter();
+};

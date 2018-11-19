@@ -15,13 +15,8 @@
 #define PARSE_SERVICE             1
 #define PARSE_REPORT              2
 
-//temporary parameter: the maximum number of services a provider 
-//can provided or a member can received. 
-//When the extensible array in distribution_node is implemented,
-//this parameter is useless. 
 #define MAX_REPORT_SERVICE        50
 
-//temporary parameter: the maximum number of services in 7 days 
 #define MAX_SERVICE_RECORD        200
 
 #define SUN 1

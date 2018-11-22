@@ -1,13 +1,9 @@
 #include "structs.h"
-#include <cstring> 
-#include <cctype>
-#include <iostream>
-using namespace std;
-
+#include "scanner.h"
 class ManagerTerminal {
 
     public:
-        ManagerTerminal();
+        ManagerTerminal(DataCenter&);
         int AddProvider(void);
         int AddMember(void);
         int AddService(void);
@@ -22,12 +18,9 @@ class ManagerTerminal {
         int ReportSummary(void);
         int ReportEFT(void);
 
-
     private:
-
         int TerminalID;
         struct ProviderMember person;
         struct ServiceCode servicecode;
         class DataCenter * DC;
 };
-

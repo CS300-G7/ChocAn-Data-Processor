@@ -26,16 +26,19 @@ class Data {
 
 public:
 	Data();
-
+	
+	bool validateMember(ProviderMember &);
 	bool addMember(ProviderMember);
 	ProviderMember getMember(int);
+	bool validateProvider(ProviderMember &);
 	bool addProvider(ProviderMember);
 	ProviderMember getProvider(int);
 	bool removeMember(int);
 	bool removeProvider(int);
-
+	
 	bool addServiceCode(ServiceCode);
 	std::map<int, ServiceCode> getServiceCodes();
+	bool validateService(ServiceReport &);
 	int addService(ServiceReport);
 	std::map<int, ServiceReport> getServices(int);
 	bool removeService(int);	

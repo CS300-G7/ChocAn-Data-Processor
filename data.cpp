@@ -12,10 +12,18 @@ Data::Data()
 	services.push_front(std::map<int, ServiceReport>());
 }
 
-bool Data::addMember(ProviderMember mem)
+bool Data::validateMember(ProviderMember &mem)
 {
 	/* Member ID cannot be greater than nine digits. */
 	if (mem.IDNumber > 999999999)
+		return false;
+	else
+		return true;
+}
+
+bool Data::addMember(ProviderMember mem)
+{
+	if (!validateMember(mem))
 		return false;
 	members[mem.IDNumber] = mem;
 	return true;
@@ -26,10 +34,18 @@ ProviderMember Data::getMember(int id)
 	return members.at(id);
 }
 
-bool Data::addProvider(ProviderMember mem)
+bool Data::validateProvider(ProviderMember &mem)
 {
 	/* Provider ID cannot be greater than nine digits. */
 	if (mem.IDNumber > 999999999)
+		return false;
+	else
+		return true;
+}
+
+bool Data::addProvider(ProviderMember mem)
+{
+	if (!validateProvider(mem))
 		return false;
 	providers[mem.IDNumber] = mem;
 	return true;
@@ -71,14 +87,22 @@ std::map<int, ServiceCode> Data::getServiceCodes()
 	return serviceCodes;
 }
 
-int Data::addService(ServiceReport service)
+bool Data::validateService(ServiceReport &service)
 {
 	if (serviceCodes.find(service.ServiceCode) == serviceCodes.end())
-		return -1;
+		return false;
 	if (members.find(service.MemberNum) == members.end())
-		return -1;
+		return false;
 	if (providers.find(service.ProviderNum) == providers.end())
-		return -1; 
+		return false; 
+	return true;
+}
+
+
+int Data::addService(ServiceReport service)
+{
+	if (!validateService(service))
+		return -1;
 	services[0].emplace(serviceid, service);
 	return serviceid++;
 }

@@ -44,6 +44,8 @@ public:
 	bool removeService(int);	
 	/** Creates a new time period for the next report. */
 	void archiveServices();
+
+	bool requestDirectory(int);
 };
 
 #endif /* DATA_H */

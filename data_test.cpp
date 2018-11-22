@@ -10,6 +10,7 @@
 bool testValidation();
 bool testRemoval();
 bool testAddition();
+bool testDirectory();
 void printServiceSuccess(bool);
 
 int main()
@@ -22,6 +23,8 @@ int main()
 	if (!testRemoval())
 		passed = false;
 	if (!testValidation())
+		passed = false;
+	if (!testDirectory())
 		passed = false;
 
 	if (passed)
@@ -243,6 +246,36 @@ bool testValidation()
 		return false;
 
 	return true;
+}
+
+bool testDirectory()
+{
+	Data data;
+	int id = 0;
+	
+	printf("\nDIRECTORY TEST\n");
+
+	ProviderMember provider;
+	strcpy(provider.Name, "Bob");
+	provider.IDNumber = id;
+	data.addProvider(provider);
+
+	ServiceCode code;
+	code.Code = 10;
+	strcpy(code.ServiceName, "Random Service 1");
+	data.addServiceCode(code);
+
+	code.Code = 11;
+	strcpy(code.ServiceName, "Random Service 2");
+	data.addServiceCode(code);
+
+	if (data.requestDirectory(id)) {
+		printf("Test PASSED\n");
+		return true;
+	} else {
+		printf("Test FAILED\n");
+		return false;
+	}
 }
 
 void printServiceSuccess(bool v)

@@ -5,6 +5,9 @@
  */
 
 #include "data.h"
+#include <fstream>
+
+using std::endl;
 
 Data::Data()
 {
@@ -141,3 +144,22 @@ void Data::archiveServices()
 	}
 }
 
+bool Data::requestDirectory(int pid)
+{
+	try {
+		ProviderMember mem = getProvider(pid);
+		std::ofstream file("directory.txt");
+		file << "provider #" << mem.IDNumber << endl;
+		file << endl;
+
+		for (auto code : serviceCodes) {
+			file << "Code : " << code.second.Code << endl;
+			file << "Name : " << code.second.ServiceName << endl;
+			file << "Fee  : " << code.second.Fee << endl;
+			file << endl;
+		}	
+	} catch(std::exception &e) {
+		return false;
+	}
+	return true;
+}

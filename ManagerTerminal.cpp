@@ -1,37 +1,49 @@
 #include "ManagerTerminal.h"
 
+ManagerTerminal::ManagerTerminal(DataCenter& DC){
+    TerminalID = 0; 
+
+    person.Name[25] ={0};
+    person.IDNumber = 0;
+    person.StreetAddress[25] = {0};
+    person.City[14] = {0};
+    person.State[2] = {0};
+    person.ZipCode = 0;
+    person.Status = 0;
+
+    servicecode.Code = 0;
+    servicecode.ServiceName[20] = {0};
+    servicecode.Fee = 0;
+
+    this->DC = DC;
+}
+
 int ManagerTerminal::AddProvider(void){
 
     cout<<"Name: ";
-    cin.get(person.Name, 25, '\n');
-    cin.ignore(100, '\n');
+    get_string(person.Name, 25);
 
     cout<<"ID Number: ";
-    cin>>person.IDNumber;
-    cin.ignore(100, '\n');
+    get_digits(person.IDNumber, 9);
 
     cout<<"Street Address: ";
-    cin.get(person.StreetAddress, 25, '\n');
-    cin.ignore(100, '\n');
+    get_string(person.StreetAddress,25);
 
     cout<<"City: ";
-    cin.get(person.City, 14, '\n');
-    cin.ignore(100, '\n');
+    get_string(person.City, 14);
 
     cout<<"State: ";
-    cin.get(person.State, 2, '\n');
-    cin.ignore(100, '\n');
+    get_string(person.State, 2);
 
     cout<<"Zip Code: ";
-    cin>>person.ZipCode;
-    cin.ignore(100, '\n');
+    get_digits(person.ZipCode, 5);
 
     cout<<"Status: ";
-    cin>>person.Status;
-    cin.ignore(100, '\n');
+    get_int(person.Status, 0, 2);
 
     int result = DC->AddProvider(person);
-    if(result ==1)
+
+    if(result == 1)
         cout<<"Provider added"<<endl;
     else
         cout<<"Provider could not be added"<<endl;
@@ -41,32 +53,25 @@ int ManagerTerminal::AddProvider(void){
 int ManagerTerminal::AddMember(void){
 
     cout<<"Name: ";
-    cin.get(person.Name, 25, '\n');
-    cin.ignore(100, '\n');
+    get_string(person.Name, 25);
 
     cout<<"ID Number: ";
-    cin>>person.IDNumber;
-    cin.ignore(100, '\n');
+    get_digits(person.IDNumber, 9);
 
     cout<<"Street Address: ";
-    cin.get(person.StreetAddress, 25, '\n');
-    cin.ignore(100, '\n');
+    get_string(person.StreetAddress,25);
 
     cout<<"City: ";
-    cin.get(person.City, 14, '\n');
-    cin.ignore(100, '\n');
+    get_string(person.City, 14);
 
     cout<<"State: ";
-    cin.get(person.State, 2, '\n');
-    cin.ignore(100, '\n');
+    get_string(person.State, 2);
 
     cout<<"Zip Code: ";
-    cin>>person.ZipCode;
-    cin.ignore(100, '\n');
+    get_digits(person.ZipCode, 5);
 
     cout<<"Status: ";
-    cin>>person.Status;
-    cin.ignore(100, '\n');
+    get_int(person.Status, 0, 2);
 
     int result = DC->AddMember(person);
     if(result ==1)
@@ -78,17 +83,27 @@ int ManagerTerminal::AddMember(void){
 
 int ManagerTerminal::AddService(void){
 
+    float var =0;
+    bool failed = true;
+
     cout<<"Service Code: ";
-    cin>>servicecode.Code;
-    cin.ignore(100, '\n');
+    get_int(servicecode.Code, 6);
 
     cout<<"ServiceName: ";
-    cin.get(servicecode.ServiceName, 20, '\n');
-    cin.ignore(100, '\n');
+    get_string(servicecode.ServiceName, 20);
 
-    cout<<"Fee: ";
-    cin>>servicecode.Fee;
-    cin.ignore(100, '\n');
+    do{
+        cout<<"Fee: ";
+        cin>>var;
+        cin.ignore(100,'\n');
+        failed = cin.fail();
+        if(failed){
+            cin.clear();
+            cin.ignore(100,'\n');
+        }
+    }while(failed || var >=999.99);
+    float value = (int)(var*100 + .5);
+    servicecode.Fee = value/100;
 
     int result = DC->AddService(servicecode);
     if(result == 1)
@@ -128,50 +143,43 @@ int ManagerTerminal::EditProvider(void){
 
         switch(choice){
              case 1:
-                cout<<"Name: ";
-                cin.get(person.Name, 25, '\n');
-                cin.ignore(100, '\n');
-                break;
+                 cout<<"Name: ";
+                 get_string(person.Name, 25);
+                 break;
 
             case 2:
                 cout<<"ID Number: ";
-                cin>>person.IDNumber;
-                cin.ignore(100, '\n');
+                get_digits(person.IDNumber, 9);
                 break;
 
             case 3:
                 cout<<"Street Address: ";
-                cin.get(person.StreetAddress, 25, '\n');
-                cin.ignore(100, '\n');
+                get_string(person.StreetAddress,25);
                 break;
 
             case 4:
                 cout<<"City: ";
-                cin.get(person.City, 14, '\n');
-                cin.ignore(100, '\n');
+                get_string(person.City, 14);
                 break;
 
             case 5:
                 cout<<"State: ";
-                cin.get(person.State, 2, '\n');
-                cin.ignore(100, '\n');
+                get_string(person.State, 2);
                 break;
 
             case 6:
                 cout<<"Zip Code: ";
-                cin>>person.ZipCode;
-                cin.ignore(100, '\n');
+                get_digits(person.ZipCode, 5);
                 break;
 
             case 7:
                 cout<<"Status: ";
-                cin>>person.Status;
-                cin.ignore(100, '\n');
+                get_int(person.Status, 0, 2);
                 break;
 
         }
         cout<<"Would you like to edit something else? Y/N";
-        cin>>response;
+        response=yes();
     }while(response=='Y');
     
     int result = DC->EditProvider(person);
@@ -212,51 +220,44 @@ int ManagerTerminal::EditMember(void){
         }while(choice<1 || choice>7);
 
         switch(choice){
-             case 1:
+            case 1:
                 cout<<"Name: ";
-                cin.get(person.Name, 25, '\n');
-                cin.ignore(100, '\n');
+                get_string(person.Name, 25);
                 break;
 
             case 2:
                 cout<<"ID Number: ";
-                cin>>person.IDNumber;
-                cin.ignore(100, '\n');
+                get_digits(person.IDNumber, 9);
                 break;
 
             case 3:
                 cout<<"Street Address: ";
-                cin.get(person.StreetAddress, 25, '\n');
-                cin.ignore(100, '\n');
+                get_string(person.StreetAddress,25);
                 break;
 
             case 4:
                 cout<<"City: ";
-                cin.get(person.City, 14, '\n');
-                cin.ignore(100, '\n');
+                get_string(person.City, 14);
                 break;
 
             case 5:
                 cout<<"State: ";
-                cin.get(person.State, 2, '\n');
-                cin.ignore(100, '\n');
+                get_string(person.State, 2);
                 break;
 
             case 6:
                 cout<<"Zip Code: ";
-                cin>>person.ZipCode;
-                cin.ignore(100, '\n');
+                get_digits(person.ZipCode, 5);
                 break;
 
             case 7:
                 cout<<"Status: ";
-                cin>>person.Status;
-                cin.ignore(100, '\n');
+                get_int(person.Status, 0, 2);
                 break;
         }
 
         cout<<"Would you like to edit something else? Y/N";
-        cin>>response;
+        response=yes();
     }while(response=='Y');
         
     int result = DC->EditMember(person);
@@ -289,25 +290,32 @@ int ManagerTerminal::EditService(void){
         switch(choice){
            case 1:
                 cout<<"Service Code: ";
-                cin>>servicecode.Code;
-                cin.ignore(100, '\n');
+                get_int(servicecode.Code, 6);
                 break;
 
             case 2:
                 cout<<"Service Name: ";
-                cin.get(servicecode.ServiceName, 20, '\n');
-                cin.ignore(100, '\n');
+                get_string(servicecode.ServiceName, 20);
                 break;
 
             case 3:
-                cout<<"Fee: ";
-                cin>>servicecode.Fee;
-                cin.ignore(100, '\n');
+                do{
+                    cout<<"Fee: ";
+                    cin>>var;
+                    cin.ignore(100,'\n');
+                    failed = cin.fail();
+                    if(failed){
+                        cin.clear();
+                        cin.ignore(100,'\n');
+                    }
+                }while(failed || var>=999.99);
+                float value = (int)(var*100 + .5);
+                servicecode.Fee = value/100;
                 break;
-            }
+         }
 
         cout<<"Would you like to edit something else? Y/N";
-        cin>>response;
+        response=yes();
     }while(response=='Y');
     
     int result = DC->EditService(servicecode);
@@ -324,8 +332,7 @@ int ManagerTerminal::DeleteProvider(void){
     int idNumber = 0;
 
     cout<<"ID Number: ";
-    cin>>idNumber;
-    cin.ignore(100, '\n');
+    get_digits(idNumber, 9);
     
     int result = DC->DeleteProvider(idNumber);
     if(result == 1)
@@ -340,8 +347,7 @@ int ManagerTerminal::DeleteMember(void){
     int idNumber = 0;
     
     cout<<"ID Number: ";
-    cin>>idNumber;
-    cin.ignore(100, '\n');
+    get_digits(idNumber, 9);
 
     int result = DC->DeleteMember(idNumber);
         if(result == 1)
@@ -356,8 +362,7 @@ int ManagerTerminal::DeleteService(void){
     int code = 0;
 
     cout<<"Service Code: ";
-    cin>>code;
-    cin.ignore(100, '\n');
+    get_digits(code, 6);
 
     int result = DC->DeleteService(code);
     if(result == 1)
@@ -369,16 +374,14 @@ int ManagerTerminal::DeleteService(void){
 
 int ManagerTerminal::ReportMembers(void){
 
-    char date[12];
+    char date[19];
     int terminalID = 0;
 
     cout<<"Date: ";
-    cin.get(date,12,'\n');
-    cin.ignore(12);
+    get_date(date);
 
     cout<<"Terminal ID: ";
-    cin>>terminalID;
-    cin.ignore(100, '\n');
+    get_pos_int(terminalID);
 
     int result = ReportMembers(date, terminalID);
     return result;
@@ -386,16 +389,14 @@ int ManagerTerminal::ReportMembers(void){
 
 int ManagerTerminal::ReportProviders(void){
 
-    char date[13];
+    char date[19];
     int terminalID = 0;
 
     cout<<"Date: ";
-    cin.get(date,13,'\n');
-    cin.ignore(12);
+    get_date(date);
 
     cout<<"Terminal ID: ";
-    cin>>terminalID;
-    cin.ignore(100, '\n');
+    get_pos_int(terminalID);
 
     int result = ReportProviders(date, terminalID);
     return result;
@@ -403,16 +404,14 @@ int ManagerTerminal::ReportProviders(void){
 
 int ManagerTerminal::ReportSummary(void){
 
-    char date[13];
+    char date[19];
     int terminalID = 0;
 
     cout<<"Date: ";
-    cin.get(date,13,'\n');
-    cin.ignore(12);
+    get_date(date);
 
     cout<<"Terminal ID: ";
-    cin>>terminalID;
-    cin.ignore(100, '\n');
+    get_pos_int(terminalID);
 
     int result = ReportSummary(date, terminalID);
     return result;
@@ -424,14 +423,13 @@ int ManagerTerminal::ReportEFT(void){
     int terminalID = 0;
 
     cout<<"Date: ";
-    cin.get(date,13,'\n');
-    cin.ignore(12);
+    get_date(date);
 
     cout<<"Terminal ID: ";
-    cin>>terminalID;
-    cin.ignore(100, '\n');
+    get_pos_int(terminalID);
 
     int result = ReportEFT(date, terminalID);
     return result;
 }
+
 

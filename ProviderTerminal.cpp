@@ -2,14 +2,20 @@
 
 // TODO Write test suite
 
-ProviderTerminal::ProviderTerminal():
-	ProviderNum(0) 
-{
-	MemberNum[10] = {0};
-	// DC -> How is the destination for this ptr passed in?
+ProviderTerminal::ProviderTerminal(DataCenter& DC) {
+	ProviderNum = 0; 
+	MemberNum = {0}; // maybe change this
+	this->DC = DC; 
+	ValidateProvider();
 }
 
+
 int ProviderTerminal::ValidateProvider() {
+	
+	if (ProviderNum) {
+		cout << "Provider " + ProviderNum + " is logged in." << endl;
+		reutrn 1;
+	}
 	
 	int input = 0; 
 	cout << "Enter provider ID number: ";
@@ -27,7 +33,19 @@ int ProviderTerminal::ValidateProvider() {
 	return result;
 }
 
+
+int ProviderTerminal::CheckProviderNum() {
+	if (!ProviderNum) {
+		cout << "Permission denied: Provider is not logged in." << endl;
+		return ValidateProvider();
+	}
+	return 1;
+}
+
+
 int ProviderTerminal::ValidateMember() {
+	
+	if (!CheckProviderNum()) return 0;
 
 	int input = 0; 
 	cout << "Enter member ID number: ";
@@ -51,38 +69,16 @@ int ProviderTerminal::ValidateMember() {
 	}
 }
 
-bool ProviderTerminal::MemberLoggedIn(int IDNum) {
-	for (int i = 0; i < 10; ++i) 
-		if (MemberNum[i] == IDNum) return true;
-	return false;
-}
-
-void ProviderTerminal::LogMemberOut(int IDNum) {
-	for (int i = 0; i < 10; ++i) {
-		if (MemberNum[i] == IDNum) {
-			MemberNum[i] == 0;
-			return;
-		}
-	}
-}
-
-void ProviderTerminal::LogMemberIn(int IDNum) {
-	for (int i = 0; i < 10; ++i) {
-		if (MemberNum[i] == 0) {
-			MemberNum[i] == IDNum;
-			return;
-		}
-	}
-	// Too many members are logged in, overwrite the first member.
-	MemberNum[0] = IDNum;
-}
 
 int ProviderTerminal::DirectoryRequest() {
-	if (ProviderNum != 0) return DC->DirectoryRequest(ProviderNum);
-	else return 0;
+	if (!CheckProviderNum()) return 0;
+	else return DC->DirectoryRequest(ProviderNum);
 }
 
+
 int ProviderTerminal::ServiceReport(int IDNum) {
+	
+	if (!CheckProviderNum()) return 0;
 	
 	int input = 0;
 	int result =  0;
@@ -94,12 +90,12 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 	Report.MemberNum = IDNum;
 	Report.ProviderNum = ProviderNum;
 
-	// Populate current date and time. (TODO test this..)
+	// Populate current date and time. might not work...
 	time_t rawtime;
 	struct tm * timestring;
 	time(&rawtime);
 	timestring = localtime(&rawtime);
-	strftime(CDT, 19, "%d-%m-%Y %H:%M:%S", timestring);
+	strftime(CDT, 19, "%m-%d-%Y %H:%M:%S", timestring);
 
 	strcpy(Report.CDT, CDT);
 
@@ -140,3 +136,28 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 }
 
 
+bool ProviderTerminal::MemberLoggedIn(int IDNum) {
+	for (int i = 0; i < 10; ++i) 
+		if (MemberNum[i] == IDNum) return true;
+	return false;
+}
+
+void ProviderTerminal::LogMemberOut(int IDNum) {
+	for (int i = 0; i < 10; ++i) {
+		if (MemberNum[i] == IDNum) {
+			MemberNum[i] == 0;
+			return;
+		}
+	}
+}
+
+void ProviderTerminal::LogMemberIn(int IDNum) {
+	for (int i = 0; i < 10; ++i) {
+		if (MemberNum[i] == 0) {
+			MemberNum[i] == IDNum;
+			return;
+		}
+	}
+	// Too many members logged in. Overwrite first member.
+	MemberNum[0] = IDNum;
+}

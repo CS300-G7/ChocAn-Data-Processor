@@ -383,7 +383,7 @@ int ManagerTerminal::ReportMembers(void){
     cout<<"Terminal ID: ";
     get_pos_int(terminalID);
 
-    int result = ReportMembers(date, terminalID);
+    int result = DC->ReportMembers(date, terminalID);
     return result;
 }
 
@@ -398,7 +398,7 @@ int ManagerTerminal::ReportProviders(void){
     cout<<"Terminal ID: ";
     get_pos_int(terminalID);
 
-    int result = ReportProviders(date, terminalID);
+    int result = DC->ReportProviders(date, terminalID);
     return result;
 }
 
@@ -413,7 +413,7 @@ int ManagerTerminal::ReportSummary(void){
     cout<<"Terminal ID: ";
     get_pos_int(terminalID);
 
-    int result = ReportSummary(date, terminalID);
+    int result = DC->ReportSummary(date, terminalID);
     return result;
 }
 
@@ -428,8 +428,7 @@ int ManagerTerminal::ReportEFT(void){
     cout<<"Terminal ID: ";
     get_pos_int(terminalID);
 
-    int result = ReportEFT(date, terminalID);
+    int result = DC->ReportEFT(date, terminalID);
     return result;
 }
-
 

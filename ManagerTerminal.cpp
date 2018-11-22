@@ -87,7 +87,7 @@ int ManagerTerminal::AddService(void){
     bool failed = true;
 
     cout<<"Service Code: ";
-    get_int(servicecode.Code, 6);
+    get_digits(servicecode.Code, 6);
 
     cout<<"ServiceName: ";
     get_string(servicecode.ServiceName, 20);
@@ -272,6 +272,8 @@ int ManagerTerminal::EditService(void){
  
     int choice = 0;
     char response;
+    float var =0;
+    bool failed = true;
 
     servicecode.Code = 0;
     servicecode.ServiceName[20] = {0};
@@ -290,7 +292,7 @@ int ManagerTerminal::EditService(void){
         switch(choice){
            case 1:
                 cout<<"Service Code: ";
-                get_int(servicecode.Code, 6);
+                get_digits(servicecode.Code, 6);
                 break;
 
             case 2:
@@ -431,4 +433,5 @@ int ManagerTerminal::ReportEFT(void){
     int result = DC->ReportEFT(date, terminalID);
     return result;
 }
+
 

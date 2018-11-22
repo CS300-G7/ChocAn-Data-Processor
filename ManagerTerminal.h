@@ -3,7 +3,7 @@
 class ManagerTerminal {
 
     public:
-        ManagerTerminal(DataCenter&);
+        ManagerTerminal(DataCenter&DC);
         int AddProvider(void);
         int AddMember(void);
         int AddService(void);

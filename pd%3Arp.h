@@ -186,7 +186,7 @@ class ProviderDirectoryHandler : public HashNode {
         bool Update();
         void Display() const;
         bool Display(int) const;
-        void VerifyCode() const;
+        bool VerifyCode() const;
         bool SavingChanges() const;
 
     private:

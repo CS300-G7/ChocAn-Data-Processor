@@ -1779,10 +1779,11 @@ bool ProviderDirectoryHandler :: Update() {
 }
 
 
-void ProviderDirectoryHandler :: VerifyCode() const {
+bool ProviderDirectoryHandler :: VerifyCode() const {
     char input_code[100];
     char result[100];
-
+    bool ret = true;
+	
     cout << endl << "Please enter the code for the serivce to verify" << endl;
     cin.get(input_code, 101, '\n');
     cin.ignore(1000, '\n');
@@ -1790,12 +1791,15 @@ void ProviderDirectoryHandler :: VerifyCode() const {
         cout << "+-----------------------------+" << endl;
         cout << "|       Nonexistent code      |" << endl;
         cout << "+-----------------------------+" << endl;
+	ret = false;
     } else {
         cout << endl << "Service name:" << endl;
         cout << "--------------------" << endl;
         cout << result << endl;
         cout << "--------------------" << endl;
     }
+	
+    return ret;
 }
 
 

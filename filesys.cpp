@@ -4100,20 +4100,24 @@ bool DataCenter :: SavingServiceRecord(struct ServiceReport& service) {
 
 
 bool DataCenter :: ValidateMember(int num) {
+    struct ProviderMember person;
+
     try {
-		getMember(num);
-	} catch (std::exception &e) {
-		return false;
-	}
-    return true;
+        person = getMember(num);
+        if(person.Status == 0)
+            return 0;
+        return 1;
+    } catch (std::exception &e) {
+	return -1;
+    }
 }
 
 
 bool DataCenter :: ValidateProvider(int num) {
     try {
-		getProvider(num);
-	} catch (std::exception &e) {
-		return false;
-	}
-    return true;
+	getProvider(num);
+    } catch (std::exception &e) {
+	return -1;
+    }
+    return 0;
 }

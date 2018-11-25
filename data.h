@@ -65,8 +65,8 @@ class DataCenter : public Data {
 		
 		~DataCenter();
 
-		bool ValidateMember(int);
-		bool ValidateProvider(int);
+		int ValidateMember(int);
+		int ValidateProvider(int);
 		int SavingServiceRecord();
 		bool SavingServiceRecord(struct ServiceReport&);
 

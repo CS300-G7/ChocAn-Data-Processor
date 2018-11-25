@@ -1,21 +1,21 @@
 struct ServiceReport
 {
-	char CDT[19];	//Current Date and Time
-	char DoS[10];	//Date of service
+	char CDT[20];	//Current Date and Time
+	char DoS[11];	//Date of service
 	int ProviderNum;
 	int MemberNum;
 	int ServiceCode;
-	char Comments[100];
+	char Comments[101];
 	ServiceReport * next;
 };
 
 struct ProviderMember
 {
-	char Name[25];
+	char Name[26];
 	int IDNumber;
-	char StreetAddess[25];
-	char City[14];
-	char State[2];
+	char StreetAddress[26];
+	char City[15];
+	char State[3];
 	int ZipCode;
 	int Status;	//member status, 0 for suspended, 1 for valid
 };

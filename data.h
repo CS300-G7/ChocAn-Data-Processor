@@ -13,11 +13,12 @@
 #include <deque>
 
 class Data {
+protected:
 	/* Pretend this is the database or something. */
 	std::map<int, ProviderMember> members;
 	std::map<int, ProviderMember> providers;
 	std::map<int, ServiceCode> serviceCodes;
-	std::deque<std::map<int, ServiceReport>> services;
+	std::deque<std::map<int, ServiceReport> > services;
 	int serviceid;
 
 	/* List of members/providers to be deleted. */	
@@ -26,7 +27,7 @@ class Data {
 
 public:
 	Data();
-	
+
 	bool validateMember(ProviderMember &);
 	bool addMember(ProviderMember);
 	ProviderMember getMember(int);
@@ -35,7 +36,7 @@ public:
 	ProviderMember getProvider(int);
 	bool removeMember(int);
 	bool removeProvider(int);
-	
+
 	bool addServiceCode(ServiceCode);
 	std::map<int, ServiceCode> getServiceCodes();
 	bool validateService(ServiceReport &);
@@ -50,3 +51,28 @@ public:
 
 #endif /* DATA_H */
 
+
+/*
+ * Author: Yiming Lin
+ * Date: 20 Nov 2018
+ * Import & Export data center records
+ */
+
+class DataCenter : public Data {
+	public: 
+		DataCenter();
+		DataCenter(class FileManager*);
+		
+		~DataCenter();
+
+		bool ValidateMember(int);
+		bool ValidateProvider(int);
+		int SavingServiceRecord();
+		bool SavingServiceRecord(struct ServiceReport&);
+
+	private: 
+		bool ImportExternal();
+		bool ExportExternal();
+
+		FileManager* f_manager_;
+};

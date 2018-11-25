@@ -2,19 +2,20 @@
 
 // TODO Write test suite
 
-ProviderTerminal::ProviderTerminal(DataCenter& DC) {
+ProviderTerminal::ProviderTerminal(DataCenter* dc, ProviderDirectoryHandler* handler) {
 	ProviderNum = 0; 
-	MemberNum = {0}; // maybe change this
-	this->DC = DC; 
-	ValidateProvider();
+	for (int i = 0; i < 10; ++i)
+		MemberNum[i] = 0;
+	DC = dc;
+	pd_handler_ = handler;
 }
 
 
 int ProviderTerminal::ValidateProvider() {
 	
 	if (ProviderNum) {
-		cout << "Provider " + ProviderNum + " is logged in." << endl;
-		reutrn 1;
+		cout << "Provider " << ProviderNum << " is logged in." << endl;
+		return 1;
 	}
 	
 	int input = 0; 
@@ -27,7 +28,7 @@ int ProviderTerminal::ValidateProvider() {
 		cout << "VALIDATED" << endl;
 		ProviderNum = input;
 	} else {
-		cout << "NO SUCH PROVIDER" << endl;
+		cout << "INVALID" << endl;
 	}
 
 	return result;
@@ -61,7 +62,7 @@ int ProviderTerminal::ValidateMember() {
 		} else if (result == 0) {
 			cout << "SUSPENDED" << endl;
 		} else { 
-			cout << "NO SUCH MEMBER" << endl;
+			cout << "INVALID" << endl;
 		}
 
 	} else {
@@ -72,7 +73,9 @@ int ProviderTerminal::ValidateMember() {
 
 int ProviderTerminal::DirectoryRequest() {
 	if (!CheckProviderNum()) return 0;
-	else return DC->DirectoryRequest(ProviderNum);
+	//else return DC->DirectoryRequest(ProviderNum);
+	pd_handler_ -> Display();
+	return 1;
 }
 
 
@@ -113,10 +116,11 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 
 	// Populate service code.
 	do {
-		cout << "Enter service code: ";
-		cin >> input;
-		char * ServiceName = DC->ValidateService(input);
-		cout << "Service name: " << ServiceName << endl;
+		//cout << "Enter service code: ";
+		//cin >> input;
+		//char * ServiceName = DC->validateService(input);
+		pd_handler_ -> VerifyCode();
+		//cout << "Service name: " << ServiceName << endl;
 		cout << "Is this correct? (y/n): ";
 		if (yes()) done = true;
 	} while (!done);
@@ -131,7 +135,7 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 	// Log out the member.
 	LogMemberOut(IDNum);
 
-	result = DC->SaveServiceReport(Report);
+	result = DC->SavingServiceRecord(Report);
 	return result;
 }
 
@@ -145,7 +149,7 @@ bool ProviderTerminal::MemberLoggedIn(int IDNum) {
 void ProviderTerminal::LogMemberOut(int IDNum) {
 	for (int i = 0; i < 10; ++i) {
 		if (MemberNum[i] == IDNum) {
-			MemberNum[i] == 0;
+			MemberNum[i] = 0;
 			return;
 		}
 	}
@@ -154,7 +158,7 @@ void ProviderTerminal::LogMemberOut(int IDNum) {
 void ProviderTerminal::LogMemberIn(int IDNum) {
 	for (int i = 0; i < 10; ++i) {
 		if (MemberNum[i] == 0) {
-			MemberNum[i] == IDNum;
+			MemberNum[i] = IDNum;
 			return;
 		}
 	}

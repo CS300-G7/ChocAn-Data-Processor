@@ -9,6 +9,7 @@
 
 using std::endl;
 
+
 Data::Data()
 {
 	serviceid = 1;
@@ -26,7 +27,8 @@ bool Data::validateMember(ProviderMember &mem)
 
 bool Data::addMember(ProviderMember mem)
 {
-	if (!validateMember(mem))
+	/* Member ID cannot be greater than nine digits. */
+	if (mem.IDNumber > 999999999)
 		return false;
 	members[mem.IDNumber] = mem;
 	return true;
@@ -48,7 +50,8 @@ bool Data::validateProvider(ProviderMember &mem)
 
 bool Data::addProvider(ProviderMember mem)
 {
-	if (!validateProvider(mem))
+	/* Provider ID cannot be greater than nine digits. */
+	if (mem.IDNumber > 999999999)
 		return false;
 	providers[mem.IDNumber] = mem;
 	return true;
@@ -101,11 +104,14 @@ bool Data::validateService(ServiceReport &service)
 	return true;
 }
 
-
 int Data::addService(ServiceReport service)
 {
-	if (!validateService(service))
+	if (serviceCodes.find(service.ServiceCode) == serviceCodes.end())
 		return -1;
+	if (members.find(service.MemberNum) == members.end())
+		return -1;
+	if (providers.find(service.ProviderNum) == providers.end())
+		return -1; 
 	services[0].emplace(serviceid, service);
 	return serviceid++;
 }
@@ -144,6 +150,7 @@ void Data::archiveServices()
 	}
 }
 
+
 bool Data::requestDirectory(int pid)
 {
 	try {
@@ -163,3 +170,4 @@ bool Data::requestDirectory(int pid)
 	}
 	return true;
 }
+

@@ -5,6 +5,9 @@
 
 void incre3dig(char* num);
 int GetPrime(int num);
+int convertch2int(const char*);
+bool convertint2ch(int, char*);
+int power10(int num);
 
 class Date {
     public: 
@@ -22,6 +25,8 @@ class Date {
         void getnwk();
         void getchlwk(char*);
         void getchnwk(char*);
+
+        static bool getstdformat(char*, const char*);
 
         void Display();
 
@@ -44,6 +49,7 @@ class Time : public Date {
         static int tmcmp(Time&, Time&);
         static int tmcmp(const char*, const char*);
 
+        static bool getstdformat(char*, const char*);
 
         void Display();
 

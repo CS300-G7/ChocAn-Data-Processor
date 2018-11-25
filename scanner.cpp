@@ -13,11 +13,11 @@
  * @param length The limit for the input length.
  */
 void get_string(char* input, int length) {
-	cin.get(input, length, '\n');
+	cin.get(input, length+1, '\n');
 	while (cin.peek() != '\n') {
 		cout << "Invalid length. Enter a shorter string: ";
 		cin.ignore(1000, '\n');
-		cin.get(input, length, '\n');
+		cin.get(input, length+1, '\n');
 	}
 	cin.ignore(1000, '\n');	
 }
@@ -44,12 +44,13 @@ void get_string(char* input) {
  * @param max The maximum allowed value.
  */
 void get_int(int& input, int min, int max) {
-	while (cin >> input || (input > max || input < min)) {
+	while (!cin || (input > max || input < min)) {
 		cout << "Invalid entry. Enter a number in the range [";
 		cout << min << ", " << max << "]: ";
 		cin.clear();
 		cin >> input;
 	}
+	cin.ignore(1000, '\n');	
 }
 
 /**
@@ -60,12 +61,22 @@ void get_int(int& input, int min, int max) {
 void get_digits(int& input, int n) {
 	int divisor = 1;
 	for (int i = 1; i < n; ++i) divisor *= 10;
-	
-	while (cin >> input || (input/divisor >= 10 || input/divisor < 1)) {
-		cout << "Invalid entry. Enter a " << n << "-digit number: ";
-		cin.clear();
+
+	input = 0;
+	while(!input)
+	{
 		cin >> input;
+
+	       	if (!cin || (input/divisor >= 10 || input/divisor < 1))
+		{
+			cout << "Invalid entry. Enter a " << n << "-digit number: ";
+			input = 0;
+			cin.clear();
+			cin.ignore(1000,'\n');
+		}
 	} 
+
+	cin.ignore(1000,'\n');
 }
 
 /** 

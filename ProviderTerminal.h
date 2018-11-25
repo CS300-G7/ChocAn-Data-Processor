@@ -1,12 +1,12 @@
-#include "structs.h"
 #include "scanner.h"
 #include <ctime>
+#include "pd:rp.h"
 
 class ProviderTerminal {
 
 	public:
 
-		ProviderTerminal(DataCenter&);
+		ProviderTerminal(DataCenter*, ProviderDirectoryHandler*);
 
 		int ValidateMember();	
 		int ValidateProvider();	
@@ -23,7 +23,8 @@ class ProviderTerminal {
 		int ProviderNum;
 		int MemberNum[10];	
 		struct ServiceReport Report;
-		DataCenter* DC;	
+		DataCenter* DC;
+		ProviderDirectoryHandler* pd_handler_;	
 };
 
 

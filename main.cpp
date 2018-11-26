@@ -33,16 +33,7 @@ int main()
 			{
 				cout << "\nProvider Terminal Selected, Please login\n";
 				Selection = pterminal->ValidateProvider();
-				if(!Selection)
-				{
-					cout << "\nTry to Login again? (Y/N)\n"
-					       "Selection: ";
-					get_up_char(choice);
-					if (choice != 'Y')
-						Selection = 1;
-
-				}	
-				else
+				if(Selection == 1)
 				{
 					cout << "\nProvider Terminal\n";
 					while(Selection != 3)
@@ -66,6 +57,17 @@ int main()
 					}
 					delete pterminal;
 					pterminal = new ProviderTerminal(d, handler);
+				}	
+				else
+				{
+					cout << "\nTry to Login again? (Y/N)\n"
+					       "Selection: ";
+					get_up_char(choice);
+					if (choice != 'Y')
+						Selection = 1;
+					else
+						Selection = 0;
+
 				}
 			}
 			Selection = 0;
@@ -83,9 +85,9 @@ int main()
 			while(Selection != 10)
 			{
 				Selection = 0;
-				cout << "\nEnter a number selection from the menu"
+				/*cout << "\nEnter a number selection from the menu"
 				     << "\n1 ) Add a ChocAn Member"
-			     	     << "\n2 ) Add a ChocAn Provider"
+			     	 << "\n2 ) Add a ChocAn Provider"
 				     << "\n3 ) Add a ChocAn Service"
 				     << "\n4 ) Edit a ChocAn Member"
 				     << "\n5 ) Edit a ChocAn Provider"
@@ -95,7 +97,9 @@ int main()
 				     << "\n9 ) Delete a ChocAn Service"
 				     << "\n10) Quit"
 				     << "\nMenu Choice: ";
-
+				*/
+				d -> ManagerInterface();
+				cout << "Enter the number from the menu (1 - 9), Press 10 to exit." << endl;
 				while(!Selection)
 				{
 					cin >> Selection;
@@ -120,6 +124,7 @@ int main()
 				}
 				else if (Selection == 3)
 				{
+					handler -> Display();
 					mterminal->AddService();
 				}
 				else if(Selection == 4)

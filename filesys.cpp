@@ -3827,7 +3827,7 @@ bool FileManager :: CheckDirectory() {
             closedir(d);
 
             if(!manager_report_folder_good[0]) {
-                cout << "Cannot find the path: " << managerboxpath << endl;
+                cout << "Cannot find the path: " << managerboxpath << "/sysdata" << endl;
                 folder_ok = false; 
             }
         }
@@ -4099,25 +4099,76 @@ bool DataCenter :: SavingServiceRecord(struct ServiceReport& service) {
 }
 
 
-bool DataCenter :: ValidateMember(int num) {
+int DataCenter :: ValidateMember(int num) {
     struct ProviderMember person;
 
     try {
-        person = getMember(num);
+		person = getMember(num);
         if(person.Status == 0)
             return 0;
         return 1;
-    } catch (std::exception &e) {
-	return -1;
-    }
+	} catch (std::exception &e) {
+		return -1;
+	}
 }
 
 
-bool DataCenter :: ValidateProvider(int num) {
+int DataCenter :: ValidateProvider(int num) {
     try {
-	getProvider(num);
-    } catch (std::exception &e) {
-	return -1;
+		getProvider(num);
+	} catch (std::exception &e) {
+		return -1;
+	}
+    return 1;
+}
+
+
+void DataCenter :: ManagerInterface() {
+    map<int, ProviderMember> :: iterator it_provider;
+    map<int, ProviderMember> :: iterator it_member;
+
+    cout.setf(ios :: left);
+    cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "|                                            Chocoholics Anonymous Data Center                                          |" << endl;
+    cout << "+-----------+-------------+------------+------------+-------------+------------+-----------+-------------+--------------+" << endl;
+    cout << "|[1] Insert |[2] Insert   |[3] Insert  |[4] Update  |[5] Update   |[6] Update  |[7] Remove |[8] Remove   |[9] Remove    |" << endl;
+    cout << "|    Member |    Provider |    Service |    Member  |    Provider |    Service |    Member |    Provider |    Service   |" << endl;
+    cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "| [Provider]       Name      |     ID    |          Address          |       City      | State | Zip Code |    Status   |" << endl;
+    cout << "+----------------------------+-----------+---------------------------+-----------------+-------+----------+-------------+" << endl;
+
+    it_provider = providers.begin();
+    while(it_provider != providers.end()) {
+        cout << "| " << setw(26) << (it_provider -> second).Name;
+        cout << " | " << setw(9) << (it_provider -> second).IDNumber;
+        cout << " | " << setw(25) << (it_provider -> second).StreetAddress;
+        cout << " | " << setw(15) << (it_provider -> second).City;
+        cout << " | " << setw(5) << (it_provider -> second).State;
+        cout << " | " << setw(8) << (it_provider -> second).ZipCode;
+        cout << " | " << "N/A         |" << endl;
+        it_provider++;
     }
-    return 0;
+
+    cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "| [Member]       Name        |     ID    |          Address          |       City      | State | Zip Code |    Status   |" << endl;
+    cout << "+----------------------------+-----------+---------------------------+-----------------+-------+----------+-------------+" << endl; 
+
+    it_member = members.begin();
+    while(it_member != members.end()) {
+        cout << "| " << setw(26) << (it_member -> second).Name;
+        cout << " | " << setw(9) << (it_member -> second).IDNumber;
+        cout << " | " << setw(25) << (it_member -> second).StreetAddress;
+        cout << " | " << setw(15) << (it_member -> second).City;
+        cout << " | " << setw(5) << (it_member -> second).State;
+        cout << " | " << setw(8) << (it_member -> second).ZipCode;
+        if((it_member -> second).Status == 1)
+            cout << " | " << "Validated   |" << endl;
+        else if((it_member -> second).Status == 0)
+            cout << " | " << "Suspended   |" << endl;
+        else 
+            cout << " | " << "Unknown     |" << endl;
+        it_member++;
+    }
+    cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout.unsetf(ios :: left);
 }

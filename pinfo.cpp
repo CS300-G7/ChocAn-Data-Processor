@@ -1783,22 +1783,33 @@ bool ProviderDirectoryHandler :: VerifyCode() const {
     char input_code[100];
     char result[100];
     bool ret = true;
-	
-    cout << endl << "Please enter the code for the serivce to verify" << endl;
-    cin.get(input_code, 101, '\n');
-    cin.ignore(1000, '\n');
+    bool prompt_needed = false;
+
+    do{
+        cout << endl << "Please enter the code for the serivce to verify" << endl;
+        cout << "Enter 0 or -1 to display the provider directory" << endl;
+        cin.get(input_code, 101, '\n');
+        cin.ignore(1000, '\n');
+        if(strcmp(input_code, "0") == 0 || strcmp(input_code, "-1") == 0) {
+            Display();
+            prompt_needed = true;
+        } else {
+            prompt_needed = false;
+        }
+    } while(prompt_needed);
+    
     if(!SearchServiceName(input_code, result)) {
         cout << "+-----------------------------+" << endl;
         cout << "|       Nonexistent code      |" << endl;
         cout << "+-----------------------------+" << endl;
-	ret = false;
+        ret = false;
     } else {
         cout << endl << "Service name:" << endl;
         cout << "--------------------" << endl;
         cout << result << endl;
         cout << "--------------------" << endl;
     }
-	
+
     return ret;
 }
 

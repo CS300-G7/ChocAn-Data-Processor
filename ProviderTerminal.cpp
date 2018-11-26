@@ -119,10 +119,12 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 		//cout << "Enter service code: ";
 		//cin >> input;
 		//char * ServiceName = DC->validateService(input);
-		pd_handler_ -> VerifyCode();
-		//cout << "Service name: " << ServiceName << endl;
-		cout << "Is this correct? (y/n): ";
-		if (yes()) done = true;
+		if (pd_handler_ -> VerifyCode())
+		{
+			//cout << "Service name: " << ServiceName << endl;
+			cout << "Is this correct? (y/n): ";
+				if (yes()) done = true;
+		}
 	} while (!done);
 	done = false;
 

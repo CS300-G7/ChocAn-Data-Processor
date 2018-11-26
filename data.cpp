@@ -27,11 +27,15 @@ bool Data::validateMember(ProviderMember &mem)
 
 bool Data::addMember(ProviderMember mem)
 {
+	std :: pair<std :: map<int, struct ProviderMember> :: iterator, bool> ret;  
+
 	/* Member ID cannot be greater than nine digits. */
 	if (mem.IDNumber > 999999999)
 		return false;
-	members[mem.IDNumber] = mem;
-	return true;
+	ret = members.insert(std :: pair<int, struct ProviderMember>(mem.IDNumber, mem));
+	if(ret.second == true)
+		return true;
+	return false;
 }
 
 ProviderMember Data::getMember(int id)
@@ -50,11 +54,15 @@ bool Data::validateProvider(ProviderMember &mem)
 
 bool Data::addProvider(ProviderMember mem)
 {
+	std :: pair<std :: map<int, struct ProviderMember> :: iterator, bool> ret;
+
 	/* Provider ID cannot be greater than nine digits. */
 	if (mem.IDNumber > 999999999)
 		return false;
-	providers[mem.IDNumber] = mem;
-	return true;
+	ret = providers.insert(std :: pair<int, struct ProviderMember>(mem.IDNumber, mem));
+	if(ret.second == true)
+		return true;
+	return false;
 }
 
 ProviderMember Data::getProvider(int id)
@@ -64,20 +72,28 @@ ProviderMember Data::getProvider(int id)
 
 bool Data::removeMember(int id)
 {
+	int ret = -1;
+
 	if (members.find(id) != members.end()) {
 		removedMembers.push_back(id);
-		return true;
-	} else
-		return false;
+		ret = members.erase(id);
+		if(ret == 1)
+			return true;
+	} 
+	return false;
 }
 
 bool Data::removeProvider(int id)
 {
+	int ret = -1;
+
 	if (providers.find(id) != providers.end()) {
 		removedProviders.push_back(id);
-		return true;
-	} else
-		return false;
+		ret = providers.erase(id);
+		if(ret == 1)
+			return true;
+	} 
+	return false;
 }
 
 bool Data::addServiceCode(ServiceCode code)

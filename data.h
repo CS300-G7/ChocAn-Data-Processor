@@ -69,6 +69,7 @@ class DataCenter : public Data {
 		int ValidateProvider(int);
 		int SavingServiceRecord();
 		bool SavingServiceRecord(struct ServiceReport&);
+		void ManagerInterface();
 
 	private: 
 		bool ImportExternal();

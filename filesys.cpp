@@ -4130,9 +4130,6 @@ void DataCenter :: ManagerInterface() {
     cout.setf(ios :: left);
     cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
     cout << "|                                            Chocoholics Anonymous Data Center                                          |" << endl;
-    cout << "+-----------+-------------+------------+------------+-------------+------------+-----------+-------------+--------------+" << endl;
-    cout << "|[1] Insert |[2] Insert   |[3] Insert  |[4] Update  |[5] Update   |[6] Update  |[7] Remove |[8] Remove   |[9] Remove    |" << endl;
-    cout << "|    Member |    Provider |    Service |    Member  |    Provider |    Service |    Member |    Provider |    Service   |" << endl;
     cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
     cout << "| [Provider]       Name      |     ID    |          Address          |       City      | State | Zip Code |    Status   |" << endl;
     cout << "+----------------------------+-----------+---------------------------+-----------------+-------+----------+-------------+" << endl;
@@ -4170,5 +4167,11 @@ void DataCenter :: ManagerInterface() {
         it_member++;
     }
     cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "|[1] Insert |[2] Insert   |[3] Insert  |[4] Update  |[5] Update   |[6] Update  |[7] Remove |[8] Remove   |[9] Remove    |" << endl;
+    cout << "|    Member |    Provider |    Service |    Member  |    Provider |    Service |    Member |    Provider |    Service   |" << endl;
+    cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "|[10] Generate member |[11] Generate provider |[12] Generate manager |[13] Generate EFT |[14] Generate all types        |" << endl;
+    cout << "|     Report          |     Report            |     payable report   |     Report       |     of weekly report          |" << endl;
+    cout << "+---------------------+-----------------------+----------------------+------------------+-------------------------------+" << endl;
     cout.unsetf(ios :: left);
 }

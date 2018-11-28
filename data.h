@@ -25,14 +25,20 @@ protected:
 	std::vector<int> removedMembers;
 	std::vector<int> removedProviders;
 
+	ProviderMember merge(ProviderMember, ProviderMember);
+
 public:
 	Data();
 
 	bool validateMember(ProviderMember &);
 	bool addMember(ProviderMember);
+	bool editMember(ProviderMember);
+	/** Zero/null fields are not replaced. */
 	ProviderMember getMember(int);
 	bool validateProvider(ProviderMember &);
 	bool addProvider(ProviderMember);
+	/** Zero/null fields are not replaced. */
+	bool editProvider(ProviderMember);
 	ProviderMember getProvider(int);
 	bool removeMember(int);
 	bool removeProvider(int);

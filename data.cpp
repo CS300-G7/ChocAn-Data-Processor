@@ -5,10 +5,10 @@
  */
 
 #include "data.h"
+#include <string.h>
 #include <fstream>
 
 using std::endl;
-
 
 Data::Data()
 {
@@ -27,15 +27,22 @@ bool Data::validateMember(ProviderMember &mem)
 
 bool Data::addMember(ProviderMember mem)
 {
-	std :: pair<std :: map<int, struct ProviderMember> :: iterator, bool> ret;  
-
 	/* Member ID cannot be greater than nine digits. */
 	if (mem.IDNumber > 999999999)
 		return false;
-	ret = members.insert(std :: pair<int, struct ProviderMember>(mem.IDNumber, mem));
-	if(ret.second == true)
-		return true;
-	return false;
+	return members.emplace(mem.IDNumber, mem).second;
+}
+
+bool Data::editMember(ProviderMember mem)
+{
+	try {
+		ProviderMember storedMem = members.at(mem.IDNumber);
+		storedMem = merge(mem, storedMem);
+		members[mem.IDNumber] = storedMem;
+	} catch(std::exception &e) {
+		return false;
+	}
+	return true;
 }
 
 ProviderMember Data::getMember(int id)
@@ -54,15 +61,22 @@ bool Data::validateProvider(ProviderMember &mem)
 
 bool Data::addProvider(ProviderMember mem)
 {
-	std :: pair<std :: map<int, struct ProviderMember> :: iterator, bool> ret;
-
 	/* Provider ID cannot be greater than nine digits. */
 	if (mem.IDNumber > 999999999)
 		return false;
-	ret = providers.insert(std :: pair<int, struct ProviderMember>(mem.IDNumber, mem));
-	if(ret.second == true)
-		return true;
-	return false;
+	return providers.emplace(mem.IDNumber, mem).second;
+}
+
+bool Data::editProvider(ProviderMember mem)
+{
+	try {
+		ProviderMember storedMem = providers.at(mem.IDNumber);
+		storedMem = merge(mem, storedMem);
+		providers[mem.IDNumber] = storedMem;
+	} catch(std::exception &e) {
+		return false;
+	}
+	return true;
 }
 
 ProviderMember Data::getProvider(int id)
@@ -187,3 +201,21 @@ bool Data::requestDirectory(int pid)
 	return true;
 }
 
+ProviderMember Data::merge(ProviderMember a, ProviderMember b)
+{
+	if (strlen(a.Name) > 0)
+		strcpy(b.Name, a.Name);
+	if (a.IDNumber > 0)
+		b.IDNumber = a.IDNumber;
+	if (strlen(a.StreetAddress) > 0)
+		strcpy(b.StreetAddress, a.StreetAddress);
+	if (strlen(a.City) > 0)
+		strcpy(b.City, a.City);
+	if (strlen(a.State) > 0)
+		strcpy(b.State, a.State);
+	if (a.ZipCode > 0)
+		b.ZipCode = a.ZipCode;
+	if (a.Status > 0)
+		b.Status = a.Status;
+	return b;
+}

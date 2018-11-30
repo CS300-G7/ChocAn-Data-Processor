@@ -1,7 +1,15 @@
+/* November 30 2018
+ * Kathryn Silva
+ * CS 300-003: Group 7
+ */
+
 #include "scanner.h"
 #include <ctime>
 #include "pd:rp.h"
 
+/* 
+ * Provider Terminal class.
+ */
 class ProviderTerminal {
 
 	public:

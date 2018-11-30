@@ -2737,7 +2737,6 @@ int FileManager :: TraverseDirectory(const char* pathname, int mode) {
     dirent* dir;
     DIR* d;
     int ret;
-    int arglen;
     char* subdir;
 
     if(!pathname || lstat(pathname, &statbuf) < 0 || S_ISDIR(statbuf.st_mode) == 0)

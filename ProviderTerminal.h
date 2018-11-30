@@ -11,6 +11,7 @@ class ProviderTerminal {
 		int ValidateMember();	
 		int ValidateProvider();	
 		int DirectoryRequest();	
+		void menu();
 
 	private:
 

@@ -455,3 +455,110 @@ int ManagerTerminal :: InputDayOfWeek() {
     if(response == 7)
         return SUN;
 }
+
+void ManagerTerminal::menu()
+{
+	if(!DC || !pd_handler_ || !file_manager_)
+	{
+		cout << "\nManager Terminal can not start because the Data Center, File Manager or Provider Directory is unavailable!\n";
+		return;
+	}
+
+			int Selection = 0;	
+			cout << "\nManager Terminal\n";
+			while(Selection != 15)
+			{
+				Selection = 0;
+				/*cout << "\nEnter a number selection from the menu"
+				     << "\n1 ) Add a ChocAn Member"
+			     	 << "\n2 ) Add a ChocAn Provider"
+				     << "\n3 ) Add a ChocAn Service"
+				     << "\n4 ) Edit a ChocAn Member"
+				     << "\n5 ) Edit a ChocAn Provider"
+				     << "\n6 ) Edit a ChocAn Service"
+				     << "\n7 ) Delete a ChocAn Member"
+				     << "\n8 ) Delete a ChocAn Provider"
+				     << "\n9 ) Delete a ChocAn Service"
+				     << "\n10) Quit"
+				     << "\nMenu Choice: ";
+				*/
+				DC->ManagerInterface();
+				cout << "Enter the number from the menu (1 - 14), Press 15 to exit." << endl;
+				while(!Selection)
+				{
+					cin >> Selection;
+
+				       	if (!cin)
+					{
+						cout << "Invalid entry. Enter a number from the menu";
+						Selection = 0;
+						cin.clear();
+						cin.ignore(1000,'\n');
+					}
+					cin.ignore(1000,'\n');
+				} 
+
+				if(Selection == 1)
+				{
+					AddMember();
+				}
+				else if (Selection == 2)
+				{
+					AddProvider();
+				}
+				else if (Selection == 3)
+				{
+					pd_handler_-> Display();
+					AddService();
+				}
+				else if(Selection == 4)
+				{
+					EditMember();
+				}
+				else if(Selection == 5)
+				{
+					EditProvider();
+				}
+				else if(Selection == 6)
+				{
+					EditService();
+				}
+				else if(Selection == 7)
+				{
+					DeleteMember();
+				}
+				else if(Selection == 8)
+				{
+					DeleteProvider();
+				}
+				else if(Selection == 9)
+				{
+					DeleteService();
+				} 
+				else if(Selection == 10) 
+				{
+					int count_member_report = ReportMembers();
+					cout << count_member_report << " member reports are generated." << endl; 
+				}
+				else if(Selection == 11)
+				{
+					int count_provider_report = ReportProviders();
+					cout << count_provider_report << " provider reports are generated." << endl; 	
+				}
+				else if(Selection == 12)
+				{
+					int count_manager_report = ReportSummary();
+					cout << count_manager_report << " manager report is generated." << endl; 
+				}
+				else if(Selection == 13)
+				{
+					int count_eft_report = ReportEFT();
+					cout << count_eft_report << " EFT report is generated." << endl;
+				}
+				else if(Selection == 14)
+				{
+					int count_all = ReportAll();
+					cout << count_all << " reports are generated." << endl;
+				}
+			}
+}

@@ -167,3 +167,58 @@ void ProviderTerminal::LogMemberIn(int IDNum) {
 	// Too many members logged in. Overwrite first member.
 	MemberNum[0] = IDNum;
 }
+
+
+//Provider Terminal Menu.
+void ProviderTerminal::menu()
+{
+	if (!DC || ! pd_handler_)
+	{
+		cout << "\nProvider Terminal can not start because the Data Center or Provider Directory is unavailable!\n";
+		return;
+	}
+
+	int Selection = 0;
+	char choice;
+
+	while(!Selection)
+	{
+		cout << "\nProvider Terminal, Please login\n";
+		Selection = ValidateProvider();
+		if(Selection == 1)
+		{
+			cout << "\nProvider Terminal\n";
+			while(Selection != 3)
+			{
+				cout << "\nEnter a number selection from the menu"
+				     << "\n1) Login/Logout a ChocAn Member"
+			     	     << "\n2) Request Provider Directory"
+				     << "\n3) Quit"
+				     << "\nMenu Choice: ";
+			       	get_digits(Selection, 1);
+
+				if(Selection == 1)
+				{
+					ValidateMember();
+				}
+				else if (Selection == 2)
+				{
+					pd_handler_->Display();			
+				}
+
+			}
+		}	
+		else
+		{
+			cout << "\nTry to Login again? (Y/N)\n"
+			       "Selection: ";
+			get_up_char(choice);
+			if (choice != 'Y')
+				Selection = 1;
+			else
+				Selection = 0;
+
+		}
+	}
+	ProviderNum = 0;
+}

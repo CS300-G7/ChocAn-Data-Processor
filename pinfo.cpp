@@ -2643,7 +2643,6 @@ ManagerReportFactory :: ~ManagerReportFactory() {
 
 
 int ManagerReportFactory :: Produce(FObj** product) {
-    int ret = 0;
     int count = 0;
     FObjProviderReportSummary material[MAX_CDC_ENTRIES];
     FObjManagerReport* mr;

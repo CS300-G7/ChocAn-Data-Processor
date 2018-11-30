@@ -169,7 +169,7 @@ void ProviderTerminal::LogMemberIn(int IDNum) {
 }
 
 
-//Provider Terminal Menu.
+//Menu for terminal added by Erik Jastad
 void ProviderTerminal::menu()
 {
 	if (!DC || ! pd_handler_)

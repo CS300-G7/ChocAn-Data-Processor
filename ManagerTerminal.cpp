@@ -1,23 +1,7 @@
-// line 93, line 177: Data Center DO NOT have 
-// related function to support editing user.
-
-
 #include "ManagerTerminal.h"
 
 ManagerTerminal::ManagerTerminal(FileManager* f,DataCenter* dc, ProviderDirectoryHandler* handler, int ID){
     TerminalID = ID; 
-    /*
-    person.Name[25] ={0};
-    person.IDNumber = 0;
-    person.StreetAddress[25] = {0};
-    person.City[14] = {0};
-    person.State[2] = {0};
-    person.ZipCode = 0;
-    person.Status = 0;
-    */
-    //servicecode.Code = 0;
-    //servicecode.ServiceName[20] = {0};
-    //servicecode.Fee = 0;
     file_manager_ = f;
     DC = dc;
     pd_handler_ = handler;
@@ -456,6 +440,7 @@ int ManagerTerminal :: InputDayOfWeek() {
         return SUN;
 }
 
+//Menu for terminal added by Erik Jastad
 void ManagerTerminal::menu()
 {
 	if(!DC || !pd_handler_ || !file_manager_)

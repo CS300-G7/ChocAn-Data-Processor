@@ -1,8 +1,13 @@
+/* 
+ * Author: Erik Jastad 
+ * Date: 17 Nov 2018
+ * Simulates either a manager or provider terminal.
+ */
+
 #include "ManagerTerminal.h"
 
 int main()
 {
-	//Awaiting proper compile
 	char sample_tm[] = "11_22_2018_11_13_41";
 
 	FileManager* f = new FileManager();
@@ -13,8 +18,8 @@ int main()
 	ManagerTerminal* mterminal = new ManagerTerminal(f,d,handler, 3);
 
 	int Selection=0;	//Menu selection variable	
-	
-	// some code goes here...
+
+	//Menu Options	
 	while(Selection!=3)
 	{
 		cout << "\n\nCHOCAN SIMULATOR\n";
@@ -27,13 +32,13 @@ int main()
 
 		if(Selection == 1)
 		{
-			pterminal->menu();
+			pterminal->menu();	//Start provider terminal menu
 			Selection = 0;
 		}
 
 		if(Selection == 2)
 		{
-			mterminal->menu();
+			mterminal->menu();	//start manager terminal menu
 			Selection = 0;
 		}
 	}

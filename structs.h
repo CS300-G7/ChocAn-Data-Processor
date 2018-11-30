@@ -1,3 +1,10 @@
+
+/* 
+ * Author: Erik Jastad 
+ * Date: 2 Nov 2018
+ * Structures used in classes to hold and transfer data
+ */
+
 struct ServiceReport
 {
 	char CDT[20];	//Current Date and Time

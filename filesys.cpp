@@ -563,7 +563,7 @@ FObjProviderService :: FObjProviderService() {
 
 
 FObjProviderService :: FObjProviderService(const FObjService& service)
-    : FObjService(service), member_name_(NULL), fee_(0.0), next_(NULL)
+    : FObjService(service), member_name_(NULL), next_(NULL), fee_(0.0)
 {
 }
 

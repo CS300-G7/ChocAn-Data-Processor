@@ -429,7 +429,6 @@ int convertch2int(const char* ch) {
 
 
 bool convertint2ch(int num, char* ch) {
-    int len;
     int bit;
     int count = 0;
     bool done = false;

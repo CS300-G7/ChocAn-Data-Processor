@@ -374,7 +374,7 @@ int ManagerTerminal :: ReportAll(void) {
 
 
 bool ManagerTerminal :: InputDate(char* receiver) {
-    int m, d, h, min, sec;
+    int m, d;
     int y = 2018;
     char dt[len2sz(LEN_DATE)];
     bool day_valid = false;

@@ -291,7 +291,7 @@ int ManagerTerminal::DeleteMember(void){
 }
 
 int ManagerTerminal::DeleteService(void){
-    pd_handler_ -> Remove();
+    return pd_handler_ -> Remove();
 }
 
 int ManagerTerminal::ReportMembers(void){

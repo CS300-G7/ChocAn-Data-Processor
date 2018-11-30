@@ -3877,8 +3877,6 @@ void FileManager :: InitProcess(bool folder[], bool report_folder[], bool manage
     char* manager_box_dir;
     size_t sz = 256;
     struct stat s;
-    DIR* dir;
-    dirent* ret;
     int d_ret;
 
 

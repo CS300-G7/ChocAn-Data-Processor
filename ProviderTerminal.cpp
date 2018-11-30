@@ -1,7 +1,14 @@
+/* November 30 2018
+ * Kathryn Silva
+ * CS 300-003: Group 7
+ */
+
 #include "ProviderTerminal.h"
 
-// TODO Write test suite
-
+/*
+ * Constructor.
+ * Initializes the Provider Terminal.
+ */
 ProviderTerminal::ProviderTerminal(DataCenter* dc, ProviderDirectoryHandler* handler) {
 	ProviderNum = 0; 
 	for (int i = 0; i < 10; ++i)
@@ -10,7 +17,9 @@ ProviderTerminal::ProviderTerminal(DataCenter* dc, ProviderDirectoryHandler* han
 	pd_handler_ = handler;
 }
 
-
+/* 
+ * Enables the terminal by logging in the provider.
+ */
 int ProviderTerminal::ValidateProvider() {
 	
 	if (ProviderNum) {
@@ -34,7 +43,11 @@ int ProviderTerminal::ValidateProvider() {
 	return result;
 }
 
-
+/* 
+ * Checks whether the terminal is enabled.
+ * return 1 Provider is logged in
+ * return 0 Provider not logged in
+ */
 int ProviderTerminal::CheckProviderNum() {
 	if (!ProviderNum) {
 		cout << "Permission denied: Provider is not logged in." << endl;
@@ -43,7 +56,10 @@ int ProviderTerminal::CheckProviderNum() {
 	return 1;
 }
 
-
+/*
+ * Validates member ID number and status.
+ * Starts a service report if the member is already logged in.
+ */
 int ProviderTerminal::ValidateMember() {
 	
 	if (!CheckProviderNum()) return 0;
@@ -70,15 +86,20 @@ int ProviderTerminal::ValidateMember() {
 	}
 }
 
-
+/* 
+ * Requests the Provider Directory from the Data Center.
+ */
 int ProviderTerminal::DirectoryRequest() {
 	if (!CheckProviderNum()) return 0;
-	//else return DC->DirectoryRequest(ProviderNum);
 	pd_handler_ -> Display();
 	return 1;
 }
 
-
+/*
+ * Prompts the provider for service data, 
+ * submits service report to Data Center.
+ * Logs out the member.
+ */
 int ProviderTerminal::ServiceReport(int IDNum) {
 	
 	if (!CheckProviderNum()) return 0;
@@ -93,7 +114,7 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 	Report.MemberNum = IDNum;
 	Report.ProviderNum = ProviderNum;
 
-	// Populate current date and time. might not work...
+	// Populate current date and time. 
 	time_t rawtime;
 	struct tm * timestring;
 	time(&rawtime);
@@ -116,12 +137,7 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 
 	// Populate service code.
 	do {
-		//cout << "Enter service code: ";
-		//cin >> input;
-		//char * ServiceName = DC->validateService(input);
-		if ((input = pd_handler_ -> VerifyCode()))
-		{
-			//cout << "Service name: " << ServiceName << endl;
+		if ((input = pd_handler_ -> VerifyCode())) {
 			cout << "Is this correct? (y/n): ";
 				if (yes()) done = true;
 		}
@@ -141,13 +157,18 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 	return result;
 }
 
-
+/* 
+ * Checks if the given member is logged in.
+ */
 bool ProviderTerminal::MemberLoggedIn(int IDNum) {
 	for (int i = 0; i < 10; ++i) 
 		if (MemberNum[i] == IDNum) return true;
 	return false;
 }
 
+/* 
+ * Logs out the given member.
+ */
 void ProviderTerminal::LogMemberOut(int IDNum) {
 	for (int i = 0; i < 10; ++i) {
 		if (MemberNum[i] == IDNum) {
@@ -157,6 +178,9 @@ void ProviderTerminal::LogMemberOut(int IDNum) {
 	}
 }
 
+/* 
+ * Logs in the given member.
+ */
 void ProviderTerminal::LogMemberIn(int IDNum) {
 	for (int i = 0; i < 10; ++i) {
 		if (MemberNum[i] == 0) {
@@ -210,10 +234,8 @@ void ProviderTerminal::menu()
 		}	
 		else
 		{
-			cout << "\nTry to Login again? (Y/N)\n"
-			       "Selection: ";
-			get_up_char(choice);
-			if (choice != 'Y')
+			cout << "\nTry to Login again? (y/n): "
+			if (yes()) 
 				Selection = 1;
 			else
 				Selection = 0;

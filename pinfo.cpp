@@ -2779,7 +2779,6 @@ ReportGenerator :: ~ReportGenerator() {
 
 bool ReportGenerator :: GenerateMemberReport() {
     FObj* product[MAX_CDC_ENTRIES];
-    ReportFactory* factory;
     int report_num = 0;
     Date dt(date_);
     char last_week[len2sz(LEN_DATE)];
@@ -2862,7 +2861,6 @@ bool ReportGenerator :: GenerateProviderReport() {
 
 bool ReportGenerator :: GenerateManagerReport() {
     FObj* product[1];
-    ReportFactory* factory;
     Date dt(date_);
     char last_week[len2sz(LEN_DATE)];
     int ret;

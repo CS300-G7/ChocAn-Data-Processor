@@ -3710,7 +3710,6 @@ bool FileManager :: CheckDirectory() {
     dirent* dir;
     DIR* d;
     struct stat statbuf;
-    int index = 0;
     char reportpath[LEN_PATH_MAX];
     char managerboxpath[LEN_PATH_MAX];
     bool folder_ok = true;

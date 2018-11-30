@@ -5,15 +5,27 @@
  */
 
 #include "ManagerTerminal.h"
+#include <chrono>
+#include <ctime>
+#include <string>
+#include <sstream>
 
 int main()
 {
-	char sample_tm[] = "11_22_2018_11_13_41";
+	//Get current date and time
+	char CDT[len2sz(LEN_TIME)];
+	time_t rawtime;
+	struct tm * timestring;
+	time(&rawtime);
+	timestring = localtime(&rawtime);
+	strftime(CDT, len2sz(LEN_TIME), "%m_%d_%Y_%H_%M_%S", timestring);
+	
 
+	//Create classes
 	FileManager* f = new FileManager();
 	f -> Initialize();
 	DataCenter* d = new DataCenter(f);
-	ProviderDirectoryHandler* handler = new ProviderDirectoryHandler(sample_tm, f);
+	ProviderDirectoryHandler* handler = new ProviderDirectoryHandler(CDT, f);
 	ProviderTerminal* pterminal = new ProviderTerminal(d, handler);
 	ManagerTerminal* mterminal = new ManagerTerminal(f,d,handler, 3);
 

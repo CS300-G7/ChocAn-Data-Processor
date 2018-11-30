@@ -1,3 +1,5 @@
+// Copyright (c) 2018 Yiming Lin
+
 #include <cstring>
 #include <iostream>
 #include "uni.h"

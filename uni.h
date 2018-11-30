@@ -1,3 +1,5 @@
+// Copyright (c) 2018 Yiming Lin
+
 #define ch2int(x) ((char)(x) - 48)
 #define int2askii(x) ((int)(x) + 48)
 #define twobit2int(x1, x2) ((int)(x1) * 10 + (int)(x2))

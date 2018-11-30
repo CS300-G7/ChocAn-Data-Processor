@@ -25,7 +25,7 @@ protected:
 	std::vector<int> removedMembers;
 	std::vector<int> removedProviders;
 
-	ProviderMember merge(ProviderMember, ProviderMember);
+	ProviderMember merge(ProviderMember&, ProviderMember&);
 
 public:
 	Data();

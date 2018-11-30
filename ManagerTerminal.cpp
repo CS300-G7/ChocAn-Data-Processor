@@ -106,7 +106,7 @@ int ManagerTerminal::EditProvider(void){
 
         do{    
             cout<<"What else would you like to edit for provider ID " << person.IDNumber << " ?: ";
-	    get_int(choice, 1, 6);
+	    get_digits(choice, 1);
 
         }while(choice<1 || choice>6);
 
@@ -139,10 +139,7 @@ int ManagerTerminal::EditProvider(void){
             case 6:
                 break;
         }
-        cout<<"Would you like to edit something else for provider ID " << person.IDNumber << " ? Y/N: ";
-	get_up_char(response);
-
-    }while(response=='Y');
+    }while(choice != 6);
     
     int result = DC->editProvider(person);
     if(result == 1)
@@ -173,8 +170,17 @@ int ManagerTerminal::EditMember(void){
 	cout<<"\nEnter the ID Number to edit: ";
         get_digits(person.IDNumber, 9);
 
-	cout<<"Enter the new status for this member: ";
-        get_int(person.Status, 0, 2);
+	cout<<"Enter the new status for this member (1 is valid, 0 is suspended: ";
+	do{
+		cin>>person.Status;
+		if(person.Status < 0 || person.Status > 1 || !cin)
+		{
+			cin.clear();
+			cin.ignore(1000, '\n');
+			cout << "Invalid input, 1 is valid status, 0 is suspended status" << endl;
+		}
+		cin.ignore(1000, '\n');
+	}while (person.Status < 0 || person.Status > 1 || !cin);
 
     do{
 	choice = 0;
@@ -188,7 +194,7 @@ int ManagerTerminal::EditMember(void){
 
         do{    
             cout<<"What else would you like to edit for member ID " << person.IDNumber << " ?: ";
-	    get_int(choice, 1, 7);
+	    get_digits(choice, 1);
 
         }while(choice<1 || choice>7);
 
@@ -220,16 +226,23 @@ int ManagerTerminal::EditMember(void){
 
             case 6:
                 cout<<"Status: ";
-                get_int(person.Status, 0, 2);
+		do{
+			cin>>person.Status;
+			if(person.Status < 0 || person.Status > 1 || !cin)
+			{
+				cin.clear();
+				cin.ignore(1000, '\n');
+				cout << "Invalid input, 1 is valid status, 0 is suspended status" << endl;
+			}
+			cin.ignore(1000, '\n');
+		}while (person.Status < 0 || person.Status > 1 || !cin);
                 break;
 
             case 7:
                 break;
         }
-        cout<<"Would you like to edit something else for member ID " << person.IDNumber << " ? Y/N: ";
-	get_up_char(response);
 
-    }while(response=='Y');
+    }while(choice != 7);
     
     
     int result = DC->editMember(person);
@@ -450,6 +463,8 @@ void ManagerTerminal::menu()
 	}
 
 			int Selection = 0;	
+			bool pdchange = false;
+
 			cout << "\nManager Terminal\n";
 			while(Selection != 15)
 			{
@@ -493,6 +508,7 @@ void ManagerTerminal::menu()
 				}
 				else if (Selection == 3)
 				{
+					pdchange = true;
 					pd_handler_-> Display();
 					AddService();
 				}
@@ -506,6 +522,7 @@ void ManagerTerminal::menu()
 				}
 				else if(Selection == 6)
 				{
+					pdchange = true;
 					EditService();
 				}
 				else if(Selection == 7)
@@ -518,6 +535,7 @@ void ManagerTerminal::menu()
 				}
 				else if(Selection == 9)
 				{
+					pdchange = true;
 					DeleteService();
 				} 
 				else if(Selection == 10) 
@@ -545,5 +563,10 @@ void ManagerTerminal::menu()
 					int count_all = ReportAll();
 					cout << count_all << " reports are generated." << endl;
 				}
+			}
+			if(pdchange)
+			{
+				pd_handler_-> SavingChanges();
+				pdchange = false;
 			}
 }

@@ -1,4 +1,6 @@
-#include "pd:rp.h"
+// Copyright (c) 2018 Yiming Lin
+
+#include "pdrp.h"
 
 
 Provider :: Provider() {
@@ -1361,6 +1363,7 @@ void ProviderDirectoryHandler :: TreeDisplay(PdBinaryEntry* proot) const {
 bool ProviderDirectoryHandler :: Insert() {
     char service_code[len2sz(LEN_SERVICE_CODE)];
     char service_name[len2sz(LEN_SERVICE_NAME)];
+    char check_existence[len2sz(LEN_SERVICE_NAME)];
     char input_code[100];
     char input_name[100];
     float fee;
@@ -1387,6 +1390,13 @@ bool ProviderDirectoryHandler :: Insert() {
             else 
                 valid = true;
         }
+
+        if(SearchServiceName(input_code, check_existence)) {
+            valid = false;
+            cout << "The input code " << input_code << " has already existed." << endl;
+            cout << "The service name corresponding to it is " << check_existence << endl;
+            cout << "Enter again." << endl;
+        }    
     }
 
     valid = false;
@@ -1653,6 +1663,7 @@ bool ProviderDirectoryHandler :: Update() {
     const PdEntry* item;
     char code[len2sz(LEN_SERVICE_CODE)];
     char name[len2sz(LEN_SERVICE_NAME)];
+    char check_existence[len2sz(LEN_SERVICE_NAME)];
     float fee;
     char input_code[100];
     char input_name[100];
@@ -1730,6 +1741,13 @@ bool ProviderDirectoryHandler :: Update() {
                     else 
                         valid_1 = true;
                 }
+
+                if(SearchServiceName(input_code, check_existence)) {
+                    valid_1 = false;
+                    cout << "The input code " << input_code << " has already existed." << endl;
+                    cout << "The service name corresponding to it is " << check_existence << endl;
+                    cout << "Enter again." << endl;
+                }  
             }
             strcpy(code, input_code);
         } else if(choice == 2) {

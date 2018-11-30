@@ -201,7 +201,7 @@ bool Data::requestDirectory(int pid)
 	return true;
 }
 
-ProviderMember Data::merge(ProviderMember a, ProviderMember b)
+ProviderMember Data::merge(ProviderMember& a, ProviderMember& b)
 {
 	b.Status = a.Status;
 

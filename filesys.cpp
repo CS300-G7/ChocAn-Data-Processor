@@ -3524,7 +3524,6 @@ int FileManager :: Read(FObjService* receiver, char* d_min, char* d_max) {
 
  
 int FileManager :: Read(FObjProviderReportSummary* receiver, char* d_min, char* d_max) {
-    int ret = 0;
     int count = 0;
     char filepath[LEN_PATH_MAX];
     char dt[len2sz(LEN_DATE)];
@@ -3659,8 +3658,6 @@ bool FileManager :: ParseEftDate(char* receiver, const char* filename) {
 
 
 bool FileManager :: ParseProviderDirectoryTime(char* receiver, const char* filename) const {
-    char tm[len2sz(LEN_TIME)];
-
     if(!filename || strlen(filename) != LEN_PD_FILE)    
         return false;
     

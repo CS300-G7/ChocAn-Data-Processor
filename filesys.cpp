@@ -2749,6 +2749,8 @@ int FileManager :: TraverseDirectory(const char* pathname, int mode) {
         if(strcmp(dir -> d_name, ".") == 0 || strcmp(dir -> d_name, "..") == 0 || 
             strcmp(dir -> d_name, ".DS_Store") == 0)
             continue;
+        if(dir -> d_name[0] == '.')
+            continue;
         if(dir -> d_type == DT_DIR) {
             subdir = new char[LEN_PATH_MAX];
             strcpy(subdir, pathname);
@@ -2852,7 +2854,6 @@ int FileManager :: WriteService(const FObjService* service) {
 
     Directory* d = new Directory(path, dt);
     service_record_head_ = WriteService(service_record_head_, d, service);
-    delete d;
 
     return 1;
 }
@@ -3147,6 +3148,8 @@ int FileManager :: WriteEftReport(const FObjEftReport* report) {
     out.open(filepath);
     ret = report -> Write(out);
     out.close();
+
+    cout << "EFT report has saved to:  " << filepath << endl; 
 
     return ret;
 }
@@ -4091,6 +4094,7 @@ bool DataCenter :: SavingServiceRecord(struct ServiceReport& service) {
         return false;
     }
     
+
     FObjService* service_record = new FObjService(service);
     ret = f_manager_ -> Write(service_record);
     delete service_record;

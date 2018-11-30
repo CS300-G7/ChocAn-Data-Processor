@@ -1779,11 +1779,12 @@ bool ProviderDirectoryHandler :: Update() {
 }
 
 
-bool ProviderDirectoryHandler :: VerifyCode() const {
+int ProviderDirectoryHandler :: VerifyCode() const {
     char input_code[100];
     char result[100];
     bool ret = true;
     bool prompt_needed = false;
+    int code = 0;
 
     do{
         cout << endl << "Please enter the code for the serivce to verify" << endl;
@@ -1810,7 +1811,9 @@ bool ProviderDirectoryHandler :: VerifyCode() const {
         cout << "--------------------" << endl;
     }
 
-    return ret;
+    if(ret)
+        code = convertch2int(input_code);
+    return code;
 }
 
 
@@ -2864,14 +2867,10 @@ bool ReportGenerator :: GenerateManagerReport() {
         } 
         cout << "Generate " << ret << " manager reports" << endl;
         
-        if(ret) {
-            ret = file_manager_ -> Write(product[0]);
-            return ret;
-        }
-
+        ret = file_manager_ -> Write(product[0]);
         delete product[0];
         product[0] = NULL;
-
+        return ret;
     }
     return false;
 }
@@ -2892,10 +2891,15 @@ bool ReportGenerator :: GenerateEftReport() {
         dt.getchlwk(last_week);
         EftReportFactory factory(file_manager_, last_week, date_);
         report_num = factory.Produce(product);
+        if(!report_num) {
+            cout << "No weekly EFT report available at present" << endl;
+            cout << "Generate 0 EFT report" << endl;
+            return false;
+        } 
         ret = file_manager_ -> Write(product[0]);
-
         delete product[0];
         product[0] = NULL;
+        cout << "Generate " << ret << " EFT reports" << endl;
 
         return ret;
     }    

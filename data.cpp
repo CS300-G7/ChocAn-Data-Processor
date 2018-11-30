@@ -203,10 +203,10 @@ bool Data::requestDirectory(int pid)
 
 ProviderMember Data::merge(ProviderMember a, ProviderMember b)
 {
+	b.Status = a.Status;
+
 	if (strlen(a.Name) > 0)
 		strcpy(b.Name, a.Name);
-	if (a.IDNumber > 0)
-		b.IDNumber = a.IDNumber;
 	if (strlen(a.StreetAddress) > 0)
 		strcpy(b.StreetAddress, a.StreetAddress);
 	if (strlen(a.City) > 0)
@@ -215,7 +215,6 @@ ProviderMember Data::merge(ProviderMember a, ProviderMember b)
 		strcpy(b.State, a.State);
 	if (a.ZipCode > 0)
 		b.ZipCode = a.ZipCode;
-	if (a.Status > 0)
-		b.Status = a.Status;
+
 	return b;
 }

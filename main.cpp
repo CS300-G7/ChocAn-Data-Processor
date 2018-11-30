@@ -82,7 +82,7 @@ int main()
 			Selection = 0;	
 			cout << "\nManager Terminal Selected";
 			cout << "\nManager Terminal\n";
-			while(Selection != 10)
+			while(Selection != 15)
 			{
 				Selection = 0;
 				/*cout << "\nEnter a number selection from the menu"
@@ -99,7 +99,7 @@ int main()
 				     << "\nMenu Choice: ";
 				*/
 				d -> ManagerInterface();
-				cout << "Enter the number from the menu (1 - 9), Press 10 to exit." << endl;
+				cout << "Enter the number from the menu (1 - 14), Press 15 to exit." << endl;
 				while(!Selection)
 				{
 					cin >> Selection;
@@ -150,6 +150,31 @@ int main()
 				else if(Selection == 9)
 				{
 					mterminal->DeleteService();
+				} 
+				else if(Selection == 10) 
+				{
+					int count_member_report = mterminal->ReportMembers();
+					cout << count_member_report << " member reports are generated." << endl; 
+				}
+				else if(Selection == 11)
+				{
+					int count_provider_report = mterminal->ReportProviders();
+					cout << count_provider_report << " provider reports are generated." << endl; 	
+				}
+				else if(Selection == 12)
+				{
+					int count_manager_report = mterminal->ReportSummary();
+					cout << count_manager_report << " manager report is generated." << endl; 
+				}
+				else if(Selection == 13)
+				{
+					int count_eft_report = mterminal->ReportEFT();
+					cout << count_eft_report << " EFT report is generated." << endl;
+				}
+				else if(Selection == 14)
+				{
+					int count_all = mterminal->ReportAll();
+					cout << count_all << " reports are generated." << endl;
 				}
 			}
 

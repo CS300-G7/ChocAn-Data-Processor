@@ -183,7 +183,7 @@ bool yes() {
         cout << "Invalid response. (y/n): ";
         get_up_char(input);
     }
-    return input == 'Y';
+    return input;
 }
 
 /** 

@@ -17,6 +17,7 @@ class ManagerTerminal {
         int ReportProviders(void);
         int ReportSummary(void);
         int ReportEFT(void);
+        int ReportAll(void);
 
     private:
         bool InputDate(char*);

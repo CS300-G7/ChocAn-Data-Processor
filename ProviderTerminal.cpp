@@ -86,8 +86,8 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 	int input = 0;
 	int result =  0;
 	bool done = false;
-	char CDT[19];
-	char DoS[19];
+	char CDT[len2sz(LEN_TIME)];
+	char DoS[len2sz(LEN_DATE)];
 
 	// Populate member and provider numbers.
 	Report.MemberNum = IDNum;
@@ -98,7 +98,7 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 	struct tm * timestring;
 	time(&rawtime);
 	timestring = localtime(&rawtime);
-	strftime(CDT, 19, "%m-%d-%Y %H:%M:%S", timestring);
+	strftime(CDT, len2sz(LEN_TIME), "%m_%d_%Y_%H_%M_%S", timestring);
 
 	strcpy(Report.CDT, CDT);
 
@@ -119,7 +119,7 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 		//cout << "Enter service code: ";
 		//cin >> input;
 		//char * ServiceName = DC->validateService(input);
-		if (pd_handler_ -> VerifyCode())
+		if ((input = pd_handler_ -> VerifyCode()))
 		{
 			//cout << "Service name: " << ServiceName << endl;
 			cout << "Is this correct? (y/n): ";

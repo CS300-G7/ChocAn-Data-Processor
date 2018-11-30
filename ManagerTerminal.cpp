@@ -99,29 +99,32 @@ int ManagerTerminal::EditProvider(void){
     int choice = 0;
     char response;
 
-    /*
-    person.Name[25] ={0};
+   
+    person.Name[0] ='\0';
     person.IDNumber = 0;
-    person.StreetAddress[25] = {0};
-    person.City[14] = {0};
-    person.State[2] = {0};
+    person.StreetAddress[0] = '\0';
+    person.City[0] = '\0';
+    person.State[0] = '\0';
     person.ZipCode = 0;
     person.Status = 0;
-    */
+    
+	cout<<"\nEnter the ID Number to edit: ";
+        get_digits(person.IDNumber, 9);
+
     do{
-        cout<<"1: Name"<<endl;
-        cout<<"2: ID Number"<<endl;
-        cout<<"3: StreetAddress"<<endl;
-        cout<<"4: City"<<endl;
-        cout<<"5: State"<<endl;
-        cout<<"6: Zip Code"<<endl;
-        cout<<"7: Status"<<endl;
-        
+	choice = 0;
+        cout<<"\n1: Name"<<endl;
+        cout<<"2: StreetAddress"<<endl;
+        cout<<"3: City"<<endl;
+        cout<<"4: State"<<endl;
+        cout<<"5: Zip Code"<<endl;
+        cout<<"6: None"<<endl;
+
         do{    
-            cout<<"What would you like to edit?: ";
-            cin>>choice;
-            cin.ignore(100, '\n');
-        }while(choice<1 || choice>7);
+            cout<<"What else would you like to edit for provider ID " << person.IDNumber << " ?: ";
+	    get_int(choice, 1, 6);
+
+        }while(choice<1 || choice>6);
 
         switch(choice){
              case 1:
@@ -130,48 +133,40 @@ int ManagerTerminal::EditProvider(void){
                  break;
 
             case 2:
-                cout<<"ID Number: ";
-                get_digits(person.IDNumber, 9);
-                break;
-
-            case 3:
                 cout<<"Street Address: ";
                 get_string(person.StreetAddress,25);
                 break;
 
-            case 4:
+            case 3:
                 cout<<"City: ";
                 get_string(person.City, 14);
                 break;
 
-            case 5:
+            case 4:
                 cout<<"State: ";
                 get_string(person.State, 2);
                 break;
 
-            case 6:
+            case 5:
                 cout<<"Zip Code: ";
                 get_digits(person.ZipCode, 5);
                 break;
 
-            case 7:
-                cout<<"Status: ";
-                get_int(person.Status, 0, 2);
+            case 6:
                 break;
-
         }
-        cout<<"Would you like to edit something else? Y/N";
-        response=yes();
+        cout<<"Would you like to edit something else for provider ID " << person.IDNumber << " ? Y/N: ";
+	get_up_char(response);
+
     }while(response=='Y');
     
-    /*
-    int result = DC->EditProvider(person);
+    int result = DC->editProvider(person);
     if(result == 1)
         cout<<"Edit succesful"<<endl;
     else
         cout<<"Edit unsuccesful"<<endl;
     return result;
-    */
+    
 
     return -1;
 }
@@ -183,81 +178,85 @@ int ManagerTerminal::EditMember(void){
     int choice = 0;
     char response;
 
-    /*person.Name[25] ={0};
+    person.Name[0] ='\0';
     person.IDNumber = 0;
-    person.StreetAddress[25] = {0};
-    person.City[14] = {0};
-    person.State[2] = {0};
+    person.StreetAddress[0] = '\0';
+    person.City[0] = '\0';
+    person.State[0] = '\0';
     person.ZipCode = 0;
     person.Status = 0;
-    */
+    
+	cout<<"\nEnter the ID Number to edit: ";
+        get_digits(person.IDNumber, 9);
+
+	cout<<"Enter the new status for this member: ";
+        get_int(person.Status, 0, 2);
+
     do{
-        cout<<"1: Name"<<endl;
-        cout<<"2: ID Number"<<endl;
-        cout<<"3: StreetAddress"<<endl;
-        cout<<"4: City"<<endl;
-        cout<<"5: State"<<endl;
-        cout<<"6: Zip Code"<<endl;
-        cout<<"7: Status"<<endl;
+	choice = 0;
+        cout<<"\n1: Name"<<endl;
+        cout<<"2: StreetAddress"<<endl;
+        cout<<"3: City"<<endl;
+        cout<<"4: State"<<endl;
+        cout<<"5: Zip Code"<<endl;
+        cout<<"6: Status"<<endl;
+        cout<<"7: None"<<endl;
 
         do{    
-            cout<<"What would you like to edit?: ";
-            cin>>choice;
-            cin.ignore(100, '\n');
+            cout<<"What else would you like to edit for member ID " << person.IDNumber << " ?: ";
+	    get_int(choice, 1, 7);
+
         }while(choice<1 || choice>7);
 
         switch(choice){
-            case 1:
-                cout<<"Name: ";
-                get_string(person.Name, 25);
-                break;
+             case 1:
+                 cout<<"Name: ";
+                 get_string(person.Name, 25);
+                 break;
 
             case 2:
-                cout<<"ID Number: ";
-                get_digits(person.IDNumber, 9);
-                break;
-
-            case 3:
                 cout<<"Street Address: ";
                 get_string(person.StreetAddress,25);
                 break;
 
-            case 4:
+            case 3:
                 cout<<"City: ";
                 get_string(person.City, 14);
                 break;
 
-            case 5:
+            case 4:
                 cout<<"State: ";
                 get_string(person.State, 2);
                 break;
 
-            case 6:
+            case 5:
                 cout<<"Zip Code: ";
                 get_digits(person.ZipCode, 5);
                 break;
 
-            case 7:
+            case 6:
                 cout<<"Status: ";
                 get_int(person.Status, 0, 2);
                 break;
-        }
 
-        cout<<"Would you like to edit something else? Y/N";
-        response=yes();
+            case 7:
+                break;
+        }
+        cout<<"Would you like to edit something else for member ID " << person.IDNumber << " ? Y/N: ";
+	get_up_char(response);
+
     }while(response=='Y');
-        
-    //int result = DC->editMember(person);
     
-    /*
+    
+    int result = DC->editMember(person);
     if(result == 1)
         cout<<"Edit succesful"<<endl;
     else
         cout<<"Edit unsuccesful"<<endl;
     return result;
-    */
+    
 
-   return -1;
+    return -1;
 }
 
 int ManagerTerminal::EditService(void){
@@ -353,6 +352,24 @@ int ManagerTerminal::ReportEFT(void){
     day_of_week = InputDayOfWeek();
     ReportGenerator* generator = new ReportGenerator(file_manager_, DC, dt, day_of_week);
     ret = generator -> GenerateEftReport();
+    delete generator;
+
+    return ret;
+}
+
+int ManagerTerminal :: ReportAll(void) {
+    char dt[len2sz(LEN_TIME)];
+    int day_of_week;
+    bool ret;
+
+    if(!InputDate(dt))
+        return 0;
+    day_of_week = InputDayOfWeek();
+    ReportGenerator* generator = new ReportGenerator(file_manager_, DC, dt, day_of_week);
+    ret = generator -> GenerateMemberReport();
+    ret += generator -> GenerateProviderReport();
+    ret += generator -> GenerateManagerReport();
+    ret += generator -> GenerateEftReport();
     delete generator;
 
     return ret;

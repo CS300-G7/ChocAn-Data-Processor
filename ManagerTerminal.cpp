@@ -451,6 +451,7 @@ int ManagerTerminal :: InputDayOfWeek() {
         return SAT;
     if(response == 7)
         return SUN;
+    return -1;
 }
 
 //Menu for terminal added by Erik Jastad

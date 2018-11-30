@@ -5,7 +5,7 @@
 
 #include "scanner.h"
 #include <ctime>
-#include "pd:rp.h"
+#include "pdrp.h"
 
 /* 
  * Provider Terminal class.

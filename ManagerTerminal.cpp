@@ -79,9 +79,7 @@ int ManagerTerminal::AddService(void){
 
 // Data Center doesn't have such a function to edit provider
 int ManagerTerminal::EditProvider(void){
-    
     int choice = 0;
-    char response;
 
    
     person.Name[0] ='\0';
@@ -155,9 +153,7 @@ int ManagerTerminal::EditProvider(void){
 
 // Data Center doesn't have such a function to edit member
 int ManagerTerminal::EditMember(void){
-    
     int choice = 0;
-    char response;
 
     person.Name[0] ='\0';
     person.IDNumber = 0;

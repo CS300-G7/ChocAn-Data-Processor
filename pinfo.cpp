@@ -1361,8 +1361,6 @@ void ProviderDirectoryHandler :: TreeDisplay(PdBinaryEntry* proot) const {
 
 
 bool ProviderDirectoryHandler :: Insert() {
-    char service_code[len2sz(LEN_SERVICE_CODE)];
-    char service_name[len2sz(LEN_SERVICE_NAME)];
     char check_existence[len2sz(LEN_SERVICE_NAME)];
     char input_code[100];
     char input_name[100];

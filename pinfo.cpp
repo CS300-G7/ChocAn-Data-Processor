@@ -2417,7 +2417,7 @@ GeneralReportFactory :: GeneralReportFactory() {
 
 
 GeneralReportFactory :: GeneralReportFactory(DataCenter* dc, FileManager* f, char* d_min, char* d_max, int type)
-    : MaterialFactory(dc, f, d_min, d_max), assembler_(NULL), type_(type)
+    : MaterialFactory(dc, f, d_min, d_max), type_(type), assembler_(NULL)
 {
 }
 

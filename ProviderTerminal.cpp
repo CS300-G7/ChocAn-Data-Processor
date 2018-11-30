@@ -234,8 +234,9 @@ void ProviderTerminal::menu()
 		}	
 		else
 		{
-			cout << "\nTry to Login again? (y/n): "
-			if (yes()) 
+			cout << "\nTry to Login again? (Y/N): ";
+			get_up_char(choice);
+			if (choice != 'Y') 
 				Selection = 1;
 			else
 				Selection = 0;

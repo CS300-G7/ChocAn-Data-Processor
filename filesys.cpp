@@ -3305,7 +3305,7 @@ int FileManager :: Read(HashNode* receiver) {
 
     closedir(d);
 
-    return found;
+    return ret;
 }
 
 

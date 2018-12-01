@@ -244,4 +244,6 @@ void ProviderTerminal::menu()
 		}
 	}
 	ProviderNum = 0;
+	for(int i = 0; i < 10; ++i)
+		MemberNum[i] = 0;
 }

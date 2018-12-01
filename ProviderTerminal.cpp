@@ -80,9 +80,10 @@ int ProviderTerminal::ValidateMember() {
 		} else { 
 			cout << "INVALID" << endl;
 		}
-
+		return result;
 	} 
-	return ServiceReport(input);
+	else
+		return ServiceReport(input);
 }
 
 /* 

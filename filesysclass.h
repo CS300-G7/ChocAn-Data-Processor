@@ -1,11 +1,18 @@
+// This file is used to declear all types of file relevant classes.
+// DO NOT CREATE OBJECT OF CLASSES IN THIS FILE, DANGUROUS. 
+// The classes in this file are created during certain processes. 
+// Individual objects in this file will muss file system in this 
+// software. 
+
 #include <fstream>
 #include <unistd.h>
 #include <iostream>
+#include <iomanip>
 #include <dirent.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <cstring>
-#include "notimplement.h"
+#include "data.h"
 
 using namespace std;
 
@@ -26,6 +33,7 @@ class FObjService : public FObj {
     public:
         FObjService();
         FObjService(char*, char*, char*, char*, char*, char*);
+        FObjService(struct ServiceReport&);
         FObjService(const FObjService&);
 
         ~FObjService();
@@ -72,6 +80,8 @@ class FObjMemberService : public FObjService {
         bool Write(ofstream&) const;
         void Display() const;
 
+        bool FormattedWrite(ofstream&) const;
+
         bool get_info(DataCenter*, class ProviderDirectoryLogging*);
         char* get_num() const; 
         void set_next(FObjMemberService*);
@@ -100,7 +110,9 @@ class FObjProviderService : public FObjService {
         bool Write(ofstream&) const;
         void Display() const;
 
-        bool get_info(DataCenter*, ProviderDirectoryLogging*);
+        bool FormattedWrite(ofstream&) const;
+
+        bool get_info(class DataCenter*, ProviderDirectoryLogging*);
         char* get_num() const;
         void set_next(FObjProviderService*);
         FObjProviderService* get_next() const;
@@ -118,6 +130,7 @@ class FObjProviderService : public FObjService {
 class Provider : public FObj {
     public: 
         Provider();
+        Provider(struct ProviderMember&);
         Provider(char*, char*, char*, char*, char*, char*);
         Provider(const Provider&);
 
@@ -129,6 +142,8 @@ class Provider : public FObj {
         bool Write(ofstream&) const;
         void Display() const;
 
+        bool FormattedWrite(ofstream&) const;
+
         bool operator<(const Provider&) const; 
         bool operator>(const Provider&) const;
         bool operator==(const Provider&) const;
@@ -139,6 +154,8 @@ class Provider : public FObj {
     
         char* get_number() const;
         char* get_name() const;
+
+        bool GetProviderMemberStruct(struct ProviderMember&) const;
 
     protected:
         void Erase();
@@ -156,6 +173,7 @@ class Member : public Provider {
     public: 
         Member();
         Member(char*, char*, char*, char*, char*, char*, char*);
+        Member(struct ProviderMember&);
         Member(const Member&);
 
         ~Member();
@@ -166,9 +184,13 @@ class Member : public Provider {
         bool Write(ofstream&) const;
         void Display() const;
 
+        bool FormattedWrite(ofstream&) const;
+
         friend bool operator<(const Member&, const Member&);
         friend bool operator>(const Member&, const Member&);
         friend bool operator==(const Member&, const Member&);
+
+        bool GetProviderMemberStruct(ProviderMember&) const;
 
     private:
         void Erase();
@@ -225,8 +247,13 @@ class FObjProviderReportSummary : public FObj {
         bool Write(ofstream&) const;
         void Display() const;
 
+        bool FormattedWrite(ofstream&) const;
+        bool FormattedWriteForManager(ofstream&) const;
+
         int get_consultation_num() const;
         float get_fee() const;
+
+        bool GenerateFileName(char*) const;
 
     protected:
         void Erase();
@@ -269,7 +296,6 @@ class FObjProviderReport : public FObjProviderReportSummary {
 };
 
 
-//need testing
 class FObjManagerReport : public FObj {
     public: 
         FObjManagerReport();
@@ -297,7 +323,6 @@ class FObjManagerReport : public FObj {
 };
 
 
-//need testing
 class FObjEFT : public FObjProviderReportSummary {
     public: 
         FObjEFT();
@@ -312,6 +337,8 @@ class FObjEFT : public FObjProviderReportSummary {
         bool Write(ofstream&) const;
         void Display() const;
 
+        bool FormattedWrite(ofstream&) const;
+
         bool GenerateFileName(char*) const;
 
     private: 
@@ -319,6 +346,28 @@ class FObjEFT : public FObjProviderReportSummary {
 
         char* provider_num_;
         char* provider_name_;
+};
+
+
+class FObjEftReport : public FObj {
+    public:  
+        FObjEftReport();
+        FObjEftReport(char*);
+        
+        ~FObjEftReport();
+
+        bool Read(ifstream&);
+        bool Write(ofstream&) const;
+        void Display() const;
+
+        bool GenerateFileName(char*) const;
+        bool InsertEftRecord(const FObjEFT&);
+
+    private: 
+        char* report_date_;
+        FObjEFT* eft_record_;
+        int size_;
+        int eft_num_;
 };
 
 
@@ -337,6 +386,8 @@ class CdcMemberEntries : public FObj {
         void Display() const;
 
         int get_entries(Member*) const;
+        int GetMemberProviderStruct(struct ProviderMember*, int) const;
+        void PackageCdcEntries(struct ProviderMember&);
 
     private:
         int size_;
@@ -359,6 +410,8 @@ class CdcProviderEntries : public FObj {
         void Display() const;
 
         int get_entries(Provider*) const;
+        int GetMemberProviderStruct(struct ProviderMember*, int) const;
+        void PackageCdcEntries(struct ProviderMember&);
 
     private:
         int size_;
@@ -452,7 +505,7 @@ class FileManager {
 
     private:
         bool CheckDirectory();
-        void InitProcess(bool[], bool[]);
+        void InitProcess(bool[], bool[], bool[]);
         void InsertServiceDirectory(Directory&);
         void InsertMemberReportDirectory(Directory&);
         void InsertProviderReportDirectory(Directory&);
@@ -477,12 +530,13 @@ class FileManager {
         int WriteCdcMemberEntries(const CdcMemberEntries* entries);
         int WriteCdcProviderEntries(const CdcProviderEntries* entries);
         int WriteProviderDirectoryEntries(const HashNode* pd_entries);
-       
-        void Read(Directory* proot, FObjProviderReportSummary* receiver, int& index, char* d_min, char* d_max);
+        int WriteProviderReportSummary(const FObjProviderReportSummary* ps);
+        int WriteEftReport(const FObjEftReport* eft_report);
 
         bool ParseProviderReportDate(char*, const char*);
         bool ParseEftDate(char*, const char*);
         bool ParseProviderDirectoryTime(char*, const char*) const;
+        bool ParseProviderReportSummaryDate(char*, const char*);
 
         //testing purpose function
         void DisplayServiceDirectory(Directory* phead);

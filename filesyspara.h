@@ -7,6 +7,7 @@
 #define DIR_member_rpt        0
 #define DIR_provider_rpt      DIR_member_rpt+1
 #define DIR_manager_rpt       DIR_provider_rpt+1
+#define DIR_eft_rpt           DIR_manager_rpt+1
 
 #define FILE_service_record   1
 #define FILE_member_report    FILE_service_record+1

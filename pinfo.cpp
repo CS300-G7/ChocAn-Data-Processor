@@ -1,4 +1,6 @@
-#include "pd:rp.h"
+// Copyright (c) 2018 Yiming Lin
+
+#include "pdrp.h"
 
 
 Provider :: Provider() {
@@ -53,6 +55,37 @@ Provider :: Provider(char* nm, char* num, char* addr, char* cty, char* stat, cha
     } else {
         zip_code_ = NULL;
     }
+}
+
+
+Provider :: Provider(struct ProviderMember& provider) {
+    name_ = new char[len2sz(strlen(provider.Name))];
+    strcpy(name_, provider.Name);
+
+    char num[len2sz(LEN_PROVIDER_NUM)];
+    if(convertint2ch(provider.IDNumber, num)) {
+        number_ = new char[len2sz(strlen(num))];
+        strcpy(number_, num);
+    } else {
+        number_ = NULL;
+    }
+    
+    address_ = new char[len2sz(strlen(provider.StreetAddress))];
+    strcpy(address_, provider.StreetAddress);
+
+    state_ = new char[len2sz(strlen(provider.State))];
+    strcpy(state_, provider.State);
+
+    char zp[len2sz(LEN_ZIP_CODE)];
+    if(convertint2ch(provider.ZipCode, zp)) {
+        zip_code_ = new char[len2sz(strlen(zp))];
+        strcpy(zip_code_, zp);
+    } else{
+        zip_code_ = NULL;
+    }
+
+    city_ = new char[len2sz(strlen(provider.City))];
+    strcpy(city_, provider.City);
 }
 
 
@@ -265,6 +298,32 @@ bool Provider :: Write(ofstream& out) const {
 }
 
 
+bool Provider :: FormattedWrite(ofstream& out) const {
+    if(!out)
+        return false;
+    
+    out.setf(ios :: left);
+    out << "+----------+" << "------------------------------+" << endl;
+    out << "| Name     | " << setw(29) << name_  << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| Number   | " << setw(29) << number_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| Address  | " << setw(29) << address_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| City     | " << setw(29) << city_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| State    | " << setw(29) << state_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| Zip code | " << setw(29) << zip_code_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << endl;
+    out.unsetf(ios :: left);
+    
+    return true;
+}
+
+
+
 void Provider :: Display() const {
     cout << endl << name_ << endl;
     cout << number_ << endl;
@@ -310,6 +369,20 @@ bool operator==(const Provider& provider1, const Provider& provider2) {
 }
 
 
+bool Provider :: GetProviderMemberStruct(ProviderMember& item) const {
+    if(!name_ || !number_ || !address_ || !zip_code_ || !city_ || !state_)
+        return false;
+
+    strcpy(item.Name, name_);
+    item.IDNumber = convertch2int(number_);
+    strcpy(item.StreetAddress, address_);
+    strcpy(item.City, city_);
+    strcpy(item.State, state_);
+    item.ZipCode = convertch2int(zip_code_);
+    return true;
+}
+
+
 char* Provider :: get_number() const {
     return number_;
 }
@@ -333,6 +406,21 @@ Member :: Member(char* nm, char* num, char* addr, char* cty, char* stat, char* z
         } else {
             status_ = NULL;
         }
+}
+
+
+Member :: Member(struct ProviderMember& member)
+    : Provider(member) {
+    if(member.Status == 0) {
+        status_ = new char[len2sz(LEN_STATUS)];
+        strcpy(status_, "Suspended");
+    } else if(member.Status == 1) {
+        status_ = new char[len2sz(LEN_STATUS)];
+        strcpy(status_, "Valid");
+    } else {
+        status_ = new char[len2sz(LEN_STATUS)];
+        strcpy(status_, "Unknown"); 
+    }
 }
 
 
@@ -410,6 +498,32 @@ bool Member :: Write(ofstream& out) const {
 }
 
 
+bool Member :: FormattedWrite(ofstream& out) const {
+    if(!out)
+        return false;
+    
+    out << endl;
+    out.setf(ios :: left);
+    out << "+----------+" << "------------------------------+" << endl;
+    out << "| Name     | " << setw(29) << name_  << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| Number   | " << setw(29) << number_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| Address  | " << setw(29) << address_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| City     | " << setw(29) << city_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| State    | " << setw(29) << state_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| Zip code | " << setw(29) << zip_code_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out.unsetf(ios :: left);
+    
+    return true;
+}
+
+
+
 void Member :: Display() const {
     Provider :: Display();
     cout << status_ << endl;
@@ -429,6 +543,24 @@ bool operator>(const Member& member1, const Member& member2) {
 bool operator==(const Member& member1, const Member& member2) {
     return member1.operator==(member2);
 }   
+
+
+bool Member :: GetProviderMemberStruct(ProviderMember& item) const {
+    if(!status_)
+        return false;
+
+    if(!Provider :: GetProviderMemberStruct(item))
+        return false;
+
+    if(strcmp(status_, "Valid") == 0)
+        item.Status = 1;
+    else if(strcmp(status_, "Suspended") == 0)
+        item.Status = 0;
+    else    
+        item.Status = -1;
+
+    return true;
+}
 
 
 ProviderDirectoryEntry :: ProviderDirectoryEntry() {
@@ -564,9 +696,20 @@ bool ProviderDirectoryEntry :: Write(ofstream& out) const {
 
 
 void ProviderDirectoryEntry :: Display() const {
-    cout << endl << service_name_ << endl;
-    cout << service_code_ << endl;
-    cout << service_fee_ << endl;
+    cout.setf(ios :: left);
+    cout << "| " << setw(7) << service_code_ << "| " << setw(24) << service_name_;
+    cout << " | $" << setw(8) << service_fee_ << "|" << endl;
+    cout << "+--------+--------------------------+----------+" << endl;
+    cout.unsetf(ios :: left);
+}
+
+
+void ProviderDirectoryEntry :: Display(int rowid) const {
+    cout.setf(ios :: left);
+    cout << "|" << setw(3) << rowid << "| " << setw(7) << service_code_ << "| " << setw(24) << service_name_;
+    cout << " | $" << setw(8) << service_fee_ << "|" << endl; 
+    cout << "+---+--------+--------------------------+----------+" << endl; 
+    cout.unsetf(ios :: left);
 }
 
 
@@ -625,6 +768,11 @@ bool PdEntry :: Write(ofstream& out) const {
         
 void PdEntry :: Display() const {
     ProviderDirectoryEntry :: Display();
+}
+
+
+void PdEntry :: Display(int rowid) const {
+    ProviderDirectoryEntry :: Display(rowid);
 }
 
         
@@ -1049,7 +1197,7 @@ ProviderDirectoryHandler :: ProviderDirectoryHandler(char* tm, int sz, FileManag
 
 void ProviderDirectoryHandler :: Init() {
     bool done = false;
-    char response[2];
+    char response;
 
     cout << endl << "Cannot find any record before " << current_time_ << endl;
     cout << "Initialization process starting..." << endl;
@@ -1057,15 +1205,13 @@ void ProviderDirectoryHandler :: Init() {
         Insert();
         cout << endl << "Continue adding entry or not? (Y/N)" << endl;
         do{
-            cin.get(response, 2, '\n');
+            cin >> response;
             cin.ignore(1000, '\n');
-            if(strcmp(response, "Y") != 0 && strcmp(response, "y") != 0 
-                && strcmp(response, "N") != 0 && strcmp(response, "n") != 0)
+            if(response != 'Y' && response != 'y' && response != 'N' && response != 'n')
                 cout << "Invalid input. Y/y represents YES, N/n represents NO. Enter again." << endl; 
-        } while(strcmp(response, "Y") != 0 && strcmp(response, "y") != 0 
-            && strcmp(response, "N") != 0 && strcmp(response, "n") != 0); 
+        } while(response != 'Y' && response != 'y' && response != 'N' && response != 'n'); 
 
-        if(strcmp(response, "Y") == 0 || strcmp(response, "y") == 0)
+        if(response == 'N' || response == 'n')
             done = true;
     }
 
@@ -1159,9 +1305,49 @@ PdBinaryEntry* ProviderDirectoryHandler :: TreeRemoveAll(PdBinaryEntry* proot) {
 
 
 void ProviderDirectoryHandler :: Display() const {
-    cout << endl << "--------- Provider Directory ----------" << endl;
-    cout << "Last change:  " << time_ << endl;
+    char stdtime[len2sz(LEN_TIME)];
+
+    if(!Time :: getstdformat(stdtime, time_)) {
+        strcpy(stdtime, time_);
+    }
+
+    cout.setf(ios :: left);
+    cout << "+----------------------------------------------+" << endl;
+    cout << "|              Provider Directory              |" << endl;
+    cout << "+----------------------------------------------+" << endl;
+    cout << "| Last change: " << setw(32) << stdtime << "|" << endl;
+    cout << "+----------------------------------------------+" << endl;
+    cout << "|  Code  |       Service Name       |    Fee   |" << endl;
+    cout << "+--------+--------------------------+----------+" << endl;
+    cout.unsetf(ios :: left);
     TreeDisplay(root_);
+}
+
+
+bool ProviderDirectoryHandler :: Display(int code) const {
+    char service_code[len2sz(LEN_SERVICE_CODE)];
+    int index = -1;
+    bool found = false;
+    PdEntry* curr = NULL;
+
+    if(!convertint2ch(code, service_code))
+        return false;
+    
+    index = Hashing(service_code);
+    if(index >= 0 && index < size_) {
+        curr = table_[index];
+        while(curr && !found) {
+            if(strcmp(service_code, curr -> get_service_code()) == 0) {
+                found = true;
+                cout << "+--------+--------------------------+----------+" << endl;
+                curr -> Display();
+            } else {
+                curr = curr -> get_next();
+            }
+        }
+    }
+
+    return found;
 }
 
 
@@ -1175,8 +1361,7 @@ void ProviderDirectoryHandler :: TreeDisplay(PdBinaryEntry* proot) const {
 
 
 bool ProviderDirectoryHandler :: Insert() {
-    char service_code[len2sz(LEN_SERVICE_CODE)];
-    char service_name[len2sz(LEN_SERVICE_NAME)];
+    char check_existence[len2sz(LEN_SERVICE_NAME)];
     char input_code[100];
     char input_name[100];
     float fee;
@@ -1203,6 +1388,13 @@ bool ProviderDirectoryHandler :: Insert() {
             else 
                 valid = true;
         }
+
+        if(SearchServiceName(input_code, check_existence)) {
+            valid = false;
+            cout << "The input code " << input_code << " has already existed." << endl;
+            cout << "The service name corresponding to it is " << check_existence << endl;
+            cout << "Enter again." << endl;
+        }    
     }
 
     valid = false;
@@ -1305,21 +1497,24 @@ bool ProviderDirectoryHandler :: Remove() {
 }
 
 
-
 int ProviderDirectoryHandler :: DisplayHash() const {
     int number = 0;
     PdEntry* curr = NULL;
 
     if(!size_ || !table_)
         return 0;
-    
+
+    cout << "+--------------------------------------------------+" << endl;
+    cout << "|                Provider Directory                |" << endl;
+    cout << "+--------------------------------------------------+" << endl;
+    cout << "|Row|  Code  |       Service Name       |    Fee   |" << endl;
+    cout << "+---+--------+--------------------------+----------+" << endl;
+
     for(int i = 0; i < size_; ++i) {
         if(table_[i]) {
             curr = table_[i];
             while(curr) {
-                cout << "Entry " << ++number;
-                curr -> Display();
-                cout << endl;
+                curr -> Display(++number);
                 curr = curr -> get_next();
             }
         }
@@ -1466,6 +1661,7 @@ bool ProviderDirectoryHandler :: Update() {
     const PdEntry* item;
     char code[len2sz(LEN_SERVICE_CODE)];
     char name[len2sz(LEN_SERVICE_NAME)];
+    char check_existence[len2sz(LEN_SERVICE_NAME)];
     float fee;
     char input_code[100];
     char input_name[100];
@@ -1543,6 +1739,13 @@ bool ProviderDirectoryHandler :: Update() {
                     else 
                         valid_1 = true;
                 }
+
+                if(SearchServiceName(input_code, check_existence)) {
+                    valid_1 = false;
+                    cout << "The input code " << input_code << " has already existed." << endl;
+                    cout << "The service name corresponding to it is " << check_existence << endl;
+                    cout << "Enter again." << endl;
+                }  
             }
             strcpy(code, input_code);
         } else if(choice == 2) {
@@ -1592,23 +1795,41 @@ bool ProviderDirectoryHandler :: Update() {
 }
 
 
-void ProviderDirectoryHandler :: VerifyCode() const {
+int ProviderDirectoryHandler :: VerifyCode() const {
     char input_code[100];
     char result[100];
+    bool ret = true;
+    bool prompt_needed = false;
+    int code = 0;
 
-    cout << endl << "Please enter the code for the serivce to verify" << endl;
-    cin.get(input_code, 101, '\n');
-    cin.ignore(1000, '\n');
+    do{
+        cout << endl << "Please enter the code for the serivce to verify" << endl;
+        cout << "Enter 0 or -1 to display the provider directory" << endl;
+        cin.get(input_code, 101, '\n');
+        cin.ignore(1000, '\n');
+        if(strcmp(input_code, "0") == 0 || strcmp(input_code, "-1") == 0) {
+            Display();
+            prompt_needed = true;
+        } else {
+            prompt_needed = false;
+        }
+    } while(prompt_needed);
+    
     if(!SearchServiceName(input_code, result)) {
         cout << "+-----------------------------+" << endl;
         cout << "|       Nonexistent code      |" << endl;
         cout << "+-----------------------------+" << endl;
+        ret = false;
     } else {
         cout << endl << "Service name:" << endl;
         cout << "--------------------" << endl;
         cout << result << endl;
         cout << "--------------------" << endl;
     }
+
+    if(ret)
+        code = convertch2int(input_code);
+    return code;
 }
 
 
@@ -1799,12 +2020,10 @@ float ProviderDirectoryLogging :: SerachFee(const char* tm, const char* code) co
                 curr = curr -> get_next();
             } else {
                 ret = curr -> SearchFee(code);
-                //cout << ret << endl;
                 found = true;
             }
        } 
         if(!found) {
-            cout << tm << "    " << code << endl;
             return -1;
         }
             
@@ -1974,19 +2193,22 @@ void DistrubutionNode :: set_right(DistrubutionNode* right) {
 
 
 FObjMemberReport* DistrubutionNode :: GenerateMemberReport(DataCenter* dc, char* dt) {
+    struct ProviderMember member;
+
     if(service_collection_ && collection_size_) {
-        // temporary value for member
-        // Member m = dc -> get_member(num);
-        // ----------------------------  Temp. value ---------------------------------
-        char temp_name[] = "Temp_Member_Name";
-        char temp_addr[] = "Temp_Address";
-        char temp_city[] = "Temp_City";
-        char temp_stat[] = "ST";
-        char temp_zc[] = "tpzip";
-        char temp_status[] = "Temp_Status";
-        Member temporary_value_member(temp_name, num_, temp_addr, temp_city, temp_stat, temp_zc, temp_status);
-        // ---------------------------------------------------------------------------
-        FObjMemberReport* mr = new FObjMemberReport(&temporary_value_member, dt);
+        if(!dc) {
+            cerr << "Cannot connect to the ChocAn Data Center." << endl;
+            return NULL;
+        }
+
+        try {
+		    member = dc -> getMember(convertch2int(num_));
+	    } catch (std::exception &e) {
+	    	return NULL;
+	    }
+
+        Member report_member(member);
+        FObjMemberReport* mr = new FObjMemberReport(&report_member, dt);
         for(int i = 0; i < collection_size_; ++i) {
             if(service_collection_[i]) {
                 FObjMemberService* ms = dynamic_cast<FObjMemberService*>(service_collection_[i]);
@@ -2001,18 +2223,22 @@ FObjMemberReport* DistrubutionNode :: GenerateMemberReport(DataCenter* dc, char*
 
 
 FObjProviderReport* DistrubutionNode :: GenerateProviderReport(DataCenter* dc, char* dt) {
+    struct ProviderMember provider;
+
     if(service_collection_ && collection_size_) {
-        // temporary value for provider
-        // Provider m = dc -> get_provider(num);
-        // ----------------------------  Temp. value ---------------------------------
-        char temp_name[] = "Temp_Provider_Name";
-        char temp_addr[] = "Temp_Address";
-        char temp_city[] = "Temp_City";
-        char temp_stat[] = "ST";
-        char temp_zc[] = "tpzip";
-        Provider temporary_value_provider(temp_name, num_, temp_addr, temp_city, temp_stat, temp_zc);
-        // ---------------------------------------------------------------------------
-        FObjProviderReport* pr = new FObjProviderReport(&temporary_value_provider, dt);
+        if(!dc) {
+            cerr << "Cannot connect to the ChocAn Data Center." << endl;
+            return NULL;
+        }
+
+        try {
+		    provider = dc -> getProvider(convertch2int(num_));
+	    } catch (std::exception &e) {
+	    	return NULL;
+	    }
+
+        Provider report_provider(provider);
+        FObjProviderReport* pr = new FObjProviderReport(&report_provider, dt);
         for(int i = 0; i < collection_size_; ++i) {
             if(service_collection_[i]) {
                 FObjProviderService* ps = dynamic_cast<FObjProviderService*>(service_collection_[i]);
@@ -2067,6 +2293,11 @@ MaterialFactory :: MaterialFactory(DataCenter* dc, FileManager* f, char* d_min, 
     if(date_max_ && date_min_) {
         material_ = new FObjService[MAX_SERVICE_RECORD];
         material_num_ = file_manager_ -> Read(material_, date_min_, date_max_);
+        if(material_num_ <= 0) {
+            delete [] material_;
+            material_ = NULL;
+            material_num_ = 0;
+        }
     } else {
         material_ = NULL;
         material_num_ = 0;
@@ -2186,7 +2417,7 @@ GeneralReportFactory :: GeneralReportFactory() {
 
 
 GeneralReportFactory :: GeneralReportFactory(DataCenter* dc, FileManager* f, char* d_min, char* d_max, int type)
-    : MaterialFactory(dc, f, d_min, d_max), assembler_(NULL), type_(type)
+    : MaterialFactory(dc, f, d_min, d_max), type_(type), assembler_(NULL)
 {
 }
 
@@ -2264,6 +2495,9 @@ GeneralReportFactory& GeneralReportFactory :: operator=(const GeneralReportFacto
 int GeneralReportFactory :: Produce(FObj** product) {
     int ret = 0;
     
+    if(!material_ || !material_num_)
+        return 0;
+
     Generation();
     Produce(product, assembler_, ret);
     return ret;
@@ -2291,14 +2525,14 @@ void GeneralReportFactory :: Generation() {
         if(type_ == 1) {
             for(int i = 0; i < material_num_; ++i) {
                 FObjMemberService ms(material_[i]);
-                ms.get_info(data_center_, &pd);
-                assembler_ = Insert(assembler_, &ms, ms.get_num());
+                if(ms.get_info(data_center_, &pd))
+                    assembler_ = Insert(assembler_, &ms, ms.get_num());
             }
         } else if(type_ == 2) {
             for(int j = 0; j < material_num_; ++j) {
                 FObjProviderService ps(material_[j]);
-                ps.get_info(data_center_, &pd);
-                assembler_ = Insert(assembler_, &ps, ps.get_num());
+                if(ps.get_info(data_center_, &pd))
+                    assembler_ = Insert(assembler_, &ps, ps.get_num());
             }
         }
     } else {
@@ -2311,9 +2545,13 @@ void GeneralReportFactory :: Generation() {
 void GeneralReportFactory :: Produce(FObj** product, DistrubutionNode* proot, int& index) {
     if(proot) {
         if(type_ == 1) {
-            product[index++] = proot -> GenerateMemberReport(data_center_, date_max_);
+            product[index] = proot -> GenerateMemberReport(data_center_, date_max_);
+            if(product[index])
+                ++index;
         } else if(type_ == 2) {
-            product[index++] = proot -> GenerateProviderReport(data_center_, date_max_);
+            product[index] = proot -> GenerateProviderReport(data_center_, date_max_);
+            if(product[index])
+                ++index;
         }
 
         Produce(product, proot -> get_left(), index);
@@ -2403,16 +2641,17 @@ ManagerReportFactory :: ~ManagerReportFactory() {
 
 
 int ManagerReportFactory :: Produce(FObj** product) {
-    int ret = 0;
     int count = 0;
     FObjProviderReportSummary material[MAX_CDC_ENTRIES];
     FObjManagerReport* mr;
 
     if(file_manager_) {
         count = file_manager_ -> Read(material, date_min_, date_max_);
-        mr = new FObjManagerReport(material, count, date_max_);
-        product[0] = mr;
-        return 1;
+        if(count > 0) {
+            mr = new FObjManagerReport(material, count, date_max_);
+            product[0] = mr;
+            return 1;
+        }
     }
     return 0;
 }
@@ -2478,11 +2717,17 @@ EftReportFactory :: ~EftReportFactory() {
 int EftReportFactory :: Produce(FObj** product) {
     int ret = 0;
     FObjEFT material[MAX_CDC_ENTRIES];
+    FObjEftReport* report;
 
     if(file_manager_) {
         ret = file_manager_ -> Read(material, date_min_, date_max_);
-        for(int i = 0; i < ret; ++i) 
-            product[i] = &material[i];
+        if(ret) {
+            report = new FObjEftReport(date_max_);
+            for(int i = 0; i < ret; ++i) 
+                report -> InsertEftRecord(material[i]);
+            product[0] = report;
+            return 1;
+        }
     }
     return ret;
 }
@@ -2534,12 +2779,11 @@ ReportGenerator :: ~ReportGenerator() {
 
 bool ReportGenerator :: GenerateMemberReport() {
     FObj* product[MAX_CDC_ENTRIES];
-    ReportFactory* factory;
     int report_num = 0;
     Date dt(date_);
     char last_week[len2sz(LEN_DATE)];
 
-    if(file_manager_ && /*data_center_ &&*/ date_) {
+    if(file_manager_ && data_center_ && date_) {
         if(day_of_week_ != FRI) {
             cout << "Member report must be generated on Friday" << endl;
             return false;
@@ -2548,7 +2792,11 @@ bool ReportGenerator :: GenerateMemberReport() {
 
         GeneralReportFactory factory(data_center_, file_manager_, last_week, date_, 1);
         report_num = factory.Produce(product);
-
+        if(!report_num) {
+            cout << "No weekly member report available at present" << endl;
+            cout << "Generate 0 member report" << endl;
+            return false;
+        }
         cout << "Generate " << report_num << " member reports" << endl;
         
         for(int i = 0; i < report_num; ++i)
@@ -2567,11 +2815,13 @@ bool ReportGenerator :: GenerateMemberReport() {
 
 bool ReportGenerator :: GenerateProviderReport() {
     FObj* product[MAX_CDC_ENTRIES];
+    FObjProviderReportSummary* concomitant;
+    FObjProviderReportSummary* sum = NULL;
     int report_num = 0;
     Date dt(date_);
     char last_week[len2sz(LEN_DATE)];
 
-    if(file_manager_ /*&& data_center_*/ && date_) {
+    if(file_manager_ && data_center_ && date_) {
         if(day_of_week_ != FRI) {
             cout << "Provider report must be generated on Friday" << endl;
             return false;
@@ -2580,9 +2830,21 @@ bool ReportGenerator :: GenerateProviderReport() {
 
         GeneralReportFactory factory(data_center_, file_manager_, last_week, date_, 2);
         report_num = factory.Produce(product);
-        
+        if(!report_num) {
+            cout << "No weekly provider report available at present" << endl;
+            cout << "Generate 0 provider report" << endl;
+            return false;
+        } 
         cout << "Generate " << report_num << " provider reports" << endl;
-       
+
+        concomitant = new FObjProviderReportSummary[report_num];
+        for(int i = 0; i < report_num; ++i) {
+            sum = dynamic_cast<FObjProviderReportSummary*>(product[i]);
+            concomitant[i] = *sum;
+            file_manager_ -> Write(&concomitant[i]);
+        }
+        delete [] concomitant;
+        
         for(int i = 0; i < report_num; ++i)
             file_manager_ -> Write(product[i]);
 
@@ -2599,7 +2861,6 @@ bool ReportGenerator :: GenerateProviderReport() {
 
 bool ReportGenerator :: GenerateManagerReport() {
     FObj* product[1];
-    ReportFactory* factory;
     Date dt(date_);
     char last_week[len2sz(LEN_DATE)];
     int ret;
@@ -2612,17 +2873,17 @@ bool ReportGenerator :: GenerateManagerReport() {
         dt.getchlwk(last_week);
         ManagerReportFactory factory(file_manager_, last_week, date_);
         ret = factory.Produce(product);
-        
+        if(!ret) {
+            cout << "No weekly manager payable report available at present" << endl;
+            cout << "Generate 0 manager payable report" << endl;
+            return false;
+        } 
         cout << "Generate " << ret << " manager reports" << endl;
         
-        if(ret) {
-            ret = file_manager_ -> Write(product[0]);
-            return ret;
-        }
-
+        ret = file_manager_ -> Write(product[0]);
         delete product[0];
         product[0] = NULL;
-
+        return ret;
     }
     return false;
 }
@@ -2633,6 +2894,7 @@ bool ReportGenerator :: GenerateEftReport() {
     int report_num = 0;
     Date dt(date_);
     char last_week[len2sz(LEN_DATE)];
+    int ret = 0;
 
     if(file_manager_ && date_) {
         if(day_of_week_ != FRI) {
@@ -2642,8 +2904,17 @@ bool ReportGenerator :: GenerateEftReport() {
         dt.getchlwk(last_week);
         EftReportFactory factory(file_manager_, last_week, date_);
         report_num = factory.Produce(product);
-        for(int i = 0; i < report_num; ++i)
-            product[i] -> Display();
+        if(!report_num) {
+            cout << "No weekly EFT report available at present" << endl;
+            cout << "Generate 0 EFT report" << endl;
+            return false;
+        } 
+        ret = file_manager_ -> Write(product[0]);
+        delete product[0];
+        product[0] = NULL;
+        cout << "Generate " << ret << " EFT reports" << endl;
+
+        return ret;
     }    
-    return (report_num > 0);
+    return ret;
 }

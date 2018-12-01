@@ -1,9 +1,9 @@
-#include "structs.h"
-#include "scanner.h"
+#include "ProviderTerminal.h"
+
 class ManagerTerminal {
 
     public:
-        ManagerTerminal(DataCenter&DC);
+        ManagerTerminal(FileManager* ,DataCenter*, ProviderDirectoryHandler*,int);
         int AddProvider(void);
         int AddMember(void);
         int AddService(void);
@@ -17,10 +17,16 @@ class ManagerTerminal {
         int ReportProviders(void);
         int ReportSummary(void);
         int ReportEFT(void);
+        int ReportAll(void);
+	void menu();
 
     private:
+        bool InputDate(char*);
+        int InputDayOfWeek();
+
         int TerminalID;
         struct ProviderMember person;
-        struct ServiceCode servicecode;
-        class DataCenter * DC;
+        DataCenter * DC;
+        ProviderDirectoryHandler* pd_handler_;
+        FileManager* file_manager_;
 };

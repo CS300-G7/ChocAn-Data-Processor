@@ -1,20 +1,30 @@
+/* November 30 2018
+ * Kathryn Silva
+ * CS 300-003: Group 7
+ */
+
 #include "ProviderTerminal.h"
 
-// TODO Write test suite
-
-ProviderTerminal::ProviderTerminal(DataCenter& DC) {
+/*
+ * Constructor.
+ * Initializes the Provider Terminal.
+ */
+ProviderTerminal::ProviderTerminal(DataCenter* dc, ProviderDirectoryHandler* handler) {
 	ProviderNum = 0; 
-	MemberNum = {0}; // maybe change this
-	this->DC = DC; 
-	ValidateProvider();
+	for (int i = 0; i < 10; ++i)
+		MemberNum[i] = 0;
+	DC = dc;
+	pd_handler_ = handler;
 }
 
-
+/* 
+ * Enables the terminal by logging in the provider.
+ */
 int ProviderTerminal::ValidateProvider() {
 	
 	if (ProviderNum) {
-		cout << "Provider " + ProviderNum + " is logged in." << endl;
-		reutrn 1;
+		cout << "Provider " << ProviderNum << " is logged in." << endl;
+		return 1;
 	}
 	
 	int input = 0; 
@@ -27,13 +37,17 @@ int ProviderTerminal::ValidateProvider() {
 		cout << "VALIDATED" << endl;
 		ProviderNum = input;
 	} else {
-		cout << "NO SUCH PROVIDER" << endl;
+		cout << "INVALID" << endl;
 	}
 
 	return result;
 }
 
-
+/* 
+ * Checks whether the terminal is enabled.
+ * return 1 Provider is logged in
+ * return 0 Provider not logged in
+ */
 int ProviderTerminal::CheckProviderNum() {
 	if (!ProviderNum) {
 		cout << "Permission denied: Provider is not logged in." << endl;
@@ -42,7 +56,10 @@ int ProviderTerminal::CheckProviderNum() {
 	return 1;
 }
 
-
+/*
+ * Validates member ID number and status.
+ * Starts a service report if the member is already logged in.
+ */
 int ProviderTerminal::ValidateMember() {
 	
 	if (!CheckProviderNum()) return 0;
@@ -61,21 +78,28 @@ int ProviderTerminal::ValidateMember() {
 		} else if (result == 0) {
 			cout << "SUSPENDED" << endl;
 		} else { 
-			cout << "NO SUCH MEMBER" << endl;
+			cout << "INVALID" << endl;
 		}
-
-	} else {
+		return result;
+	} 
+	else
 		return ServiceReport(input);
-	}
 }
 
-
+/* 
+ * Requests the Provider Directory from the Data Center.
+ */
 int ProviderTerminal::DirectoryRequest() {
 	if (!CheckProviderNum()) return 0;
-	else return DC->DirectoryRequest(ProviderNum);
+	pd_handler_ -> Display();
+	return 1;
 }
 
-
+/*
+ * Prompts the provider for service data, 
+ * submits service report to Data Center.
+ * Logs out the member.
+ */
 int ProviderTerminal::ServiceReport(int IDNum) {
 	
 	if (!CheckProviderNum()) return 0;
@@ -83,19 +107,19 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 	int input = 0;
 	int result =  0;
 	bool done = false;
-	char CDT[19];
-	char DoS[19];
+	char CDT[len2sz(LEN_TIME)];
+	char DoS[len2sz(LEN_DATE)];
 
 	// Populate member and provider numbers.
 	Report.MemberNum = IDNum;
 	Report.ProviderNum = ProviderNum;
 
-	// Populate current date and time. might not work...
+	// Populate current date and time. 
 	time_t rawtime;
 	struct tm * timestring;
 	time(&rawtime);
 	timestring = localtime(&rawtime);
-	strftime(CDT, 19, "%m-%d-%Y %H:%M:%S", timestring);
+	strftime(CDT, len2sz(LEN_TIME), "%m_%d_%Y_%H_%M_%S", timestring);
 
 	strcpy(Report.CDT, CDT);
 
@@ -113,12 +137,10 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 
 	// Populate service code.
 	do {
-		cout << "Enter service code: ";
-		cin >> input;
-		char * ServiceName = DC->ValidateService(input);
-		cout << "Service name: " << ServiceName << endl;
-		cout << "Is this correct? (y/n): ";
-		if (yes()) done = true;
+		if ((input = pd_handler_ -> VerifyCode())) {
+			cout << "Is this correct? (y/n): ";
+				if (yes()) done = true;
+		}
 	} while (!done);
 	done = false;
 
@@ -131,33 +153,97 @@ int ProviderTerminal::ServiceReport(int IDNum) {
 	// Log out the member.
 	LogMemberOut(IDNum);
 
-	result = DC->SaveServiceReport(Report);
+	result = DC->SavingServiceRecord(Report);
 	return result;
 }
 
-
+/* 
+ * Checks if the given member is logged in.
+ */
 bool ProviderTerminal::MemberLoggedIn(int IDNum) {
 	for (int i = 0; i < 10; ++i) 
 		if (MemberNum[i] == IDNum) return true;
 	return false;
 }
 
+/* 
+ * Logs out the given member.
+ */
 void ProviderTerminal::LogMemberOut(int IDNum) {
 	for (int i = 0; i < 10; ++i) {
 		if (MemberNum[i] == IDNum) {
-			MemberNum[i] == 0;
+			MemberNum[i] = 0;
 			return;
 		}
 	}
 }
 
+/* 
+ * Logs in the given member.
+ */
 void ProviderTerminal::LogMemberIn(int IDNum) {
 	for (int i = 0; i < 10; ++i) {
 		if (MemberNum[i] == 0) {
-			MemberNum[i] == IDNum;
+			MemberNum[i] = IDNum;
 			return;
 		}
 	}
 	// Too many members logged in. Overwrite first member.
 	MemberNum[0] = IDNum;
+}
+
+
+//Menu for terminal added by Erik Jastad
+void ProviderTerminal::menu()
+{
+	if (!DC || ! pd_handler_)
+	{
+		cout << "\nProvider Terminal can not start because the Data Center or Provider Directory is unavailable!\n";
+		return;
+	}
+
+	int Selection = 0;
+	char choice;
+
+	while(!Selection)
+	{
+		cout << "\nProvider Terminal, Please login\n";
+		Selection = ValidateProvider();
+		if(Selection == 1)
+		{
+			cout << "\nProvider Terminal\n";
+			while(Selection != 3)
+			{
+				cout << "\nEnter a number selection from the menu"
+				     << "\n1) Login/Logout a ChocAn Member"
+			     	     << "\n2) Request Provider Directory"
+				     << "\n3) Quit"
+				     << "\nMenu Choice: ";
+			       	get_digits(Selection, 1);
+
+				if(Selection == 1)
+				{
+					ValidateMember();
+				}
+				else if (Selection == 2)
+				{
+					pd_handler_->Display();			
+				}
+
+			}
+		}	
+		else
+		{
+			cout << "\nTry to Login again? (Y/N): ";
+			get_up_char(choice);
+			if (choice != 'Y') 
+				Selection = 1;
+			else
+				Selection = 0;
+
+		}
+	}
+	ProviderNum = 0;
+	for(int i = 0; i < 10; ++i)
+		MemberNum[i] = 0;
 }

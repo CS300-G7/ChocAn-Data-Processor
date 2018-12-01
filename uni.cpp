@@ -1,3 +1,5 @@
+// Copyright (c) 2018 Yiming Lin
+
 #include <cstring>
 #include <iostream>
 #include "uni.h"
@@ -194,6 +196,19 @@ void Date :: getchnwk(char* dt) {
 }
 
 
+bool Date :: getstdformat(char* receiver, const char* dt) {
+    if(!dt || strlen(dt) != LEN_DATE)
+        return false;
+    for(int i = 0; i < LEN_DATE; ++i)
+        receiver[i] = dt[i];
+    receiver[2] = '-';
+    receiver[5] = '-';
+    receiver[LEN_DATE] = '\0';
+    return true;
+}
+
+
+
 Time :: Time() : hour(0), minute(0), second(0)
 {
 }
@@ -312,6 +327,21 @@ int Time :: tmcmp(const char* t1, const char* t2) {
 }
 
 
+bool Time :: getstdformat(char* receiver, const char* tm) {
+    if(!tm || strlen(tm) != LEN_TIME)
+        return false;
+    for(int i = 0; i < LEN_TIME; ++i)
+        receiver[i] = tm[i];
+    receiver[2] = '-';
+    receiver[5] = '-';
+    receiver[10] = ' ';
+    receiver[13] = ':';
+    receiver[16] = ':';
+    receiver[19] = '\0';
+    return true;
+}
+
+
 //testing purpose function
 void Date :: Display() {
     cout << month << " " << day << " " << year << endl;
@@ -361,3 +391,71 @@ int GetPrime(int num) {
     int pos = position - prime_set;
     return prime_set[pos];   
 }
+
+
+int power10(int num) {
+    int ret = 1;
+
+    if(0 < num && num < 10) {
+        for(int i = 0; i < num; ++i) {
+            ret *= 10;
+        }
+    } else if(num == 0) {
+        ret = 1;
+    } else {
+        ret = -1;
+    }
+
+    return ret;
+}
+
+
+int convertch2int(const char* ch) {
+    int len;
+    int ret = 0;
+
+    if(!ch)
+        return -1;
+
+    len = strlen(ch);
+    if(len > 10)
+        return -1;
+    for(int i = len - 1; i >= 0; --i) {
+        ret += power10(i) * ch2int(ch[len - i - 1]);
+    }
+
+    return ret;
+}
+
+
+bool convertint2ch(int num, char* ch) {
+    int bit;
+    int count = 0;
+    bool done = false;
+    char tmp[10];
+
+    if(num < 0)
+        return false;
+
+    if(num - 10 < 0) {
+        ch[0] = num + '0';
+        ch[1] = '\0';
+        return true;
+    }
+     
+    while(!done) {
+        bit = num % 10;
+        tmp[count++] = bit + '0';
+        num /= 10;
+        if(num - 10 < 0) {
+            tmp[count++] = num + '0';
+            done = true;
+        }
+    }
+
+    for(int i = 0; i < count; ++i)
+        ch[count - 1 - i] = tmp[i];
+    ch[count] = '\0';
+    return true;
+}
+

@@ -5,6 +5,7 @@
  */
 
 #include "data.h"
+#include <string.h>
 #include <fstream>
 
 using std::endl;
@@ -26,9 +27,21 @@ bool Data::validateMember(ProviderMember &mem)
 
 bool Data::addMember(ProviderMember mem)
 {
-	if (!validateMember(mem))
+	/* Member ID cannot be greater than nine digits. */
+	if (mem.IDNumber > 999999999)
 		return false;
-	members[mem.IDNumber] = mem;
+	return members.emplace(mem.IDNumber, mem).second;
+}
+
+bool Data::editMember(ProviderMember mem)
+{
+	try {
+		ProviderMember storedMem = members.at(mem.IDNumber);
+		storedMem = merge(mem, storedMem);
+		members[mem.IDNumber] = storedMem;
+	} catch(std::exception &e) {
+		return false;
+	}
 	return true;
 }
 
@@ -48,9 +61,21 @@ bool Data::validateProvider(ProviderMember &mem)
 
 bool Data::addProvider(ProviderMember mem)
 {
-	if (!validateProvider(mem))
+	/* Provider ID cannot be greater than nine digits. */
+	if (mem.IDNumber > 999999999)
 		return false;
-	providers[mem.IDNumber] = mem;
+	return providers.emplace(mem.IDNumber, mem).second;
+}
+
+bool Data::editProvider(ProviderMember mem)
+{
+	try {
+		ProviderMember storedMem = providers.at(mem.IDNumber);
+		storedMem = merge(mem, storedMem);
+		providers[mem.IDNumber] = storedMem;
+	} catch(std::exception &e) {
+		return false;
+	}
 	return true;
 }
 
@@ -61,20 +86,28 @@ ProviderMember Data::getProvider(int id)
 
 bool Data::removeMember(int id)
 {
+	int ret = -1;
+
 	if (members.find(id) != members.end()) {
 		removedMembers.push_back(id);
-		return true;
-	} else
-		return false;
+		ret = members.erase(id);
+		if(ret == 1)
+			return true;
+	} 
+	return false;
 }
 
 bool Data::removeProvider(int id)
 {
+	int ret = -1;
+
 	if (providers.find(id) != providers.end()) {
 		removedProviders.push_back(id);
-		return true;
-	} else
-		return false;
+		ret = providers.erase(id);
+		if(ret == 1)
+			return true;
+	} 
+	return false;
 }
 
 bool Data::addServiceCode(ServiceCode code)
@@ -101,11 +134,14 @@ bool Data::validateService(ServiceReport &service)
 	return true;
 }
 
-
 int Data::addService(ServiceReport service)
 {
-	if (!validateService(service))
+	if (serviceCodes.find(service.ServiceCode) == serviceCodes.end())
 		return -1;
+	if (members.find(service.MemberNum) == members.end())
+		return -1;
+	if (providers.find(service.ProviderNum) == providers.end())
+		return -1; 
 	services[0].emplace(serviceid, service);
 	return serviceid++;
 }
@@ -144,6 +180,7 @@ void Data::archiveServices()
 	}
 }
 
+
 bool Data::requestDirectory(int pid)
 {
 	try {
@@ -162,4 +199,22 @@ bool Data::requestDirectory(int pid)
 		return false;
 	}
 	return true;
+}
+
+ProviderMember Data::merge(ProviderMember& a, ProviderMember& b)
+{
+	b.Status = a.Status;
+
+	if (strlen(a.Name) > 0)
+		strcpy(b.Name, a.Name);
+	if (strlen(a.StreetAddress) > 0)
+		strcpy(b.StreetAddress, a.StreetAddress);
+	if (strlen(a.City) > 0)
+		strcpy(b.City, a.City);
+	if (strlen(a.State) > 0)
+		strcpy(b.State, a.State);
+	if (a.ZipCode > 0)
+		b.ZipCode = a.ZipCode;
+
+	return b;
 }

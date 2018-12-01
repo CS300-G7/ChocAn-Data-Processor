@@ -1,16 +1,25 @@
-#include "structs.h"
+/* November 30 2018
+ * Kathryn Silva
+ * CS 300-003: Group 7
+ */
+
 #include "scanner.h"
 #include <ctime>
+#include "pdrp.h"
 
+/* 
+ * Provider Terminal class.
+ */
 class ProviderTerminal {
 
 	public:
 
-		ProviderTerminal(DataCenter&);
+		ProviderTerminal(DataCenter*, ProviderDirectoryHandler*);
 
 		int ValidateMember();	
 		int ValidateProvider();	
 		int DirectoryRequest();	
+		void menu();
 
 	private:
 
@@ -23,7 +32,8 @@ class ProviderTerminal {
 		int ProviderNum;
 		int MemberNum[10];	
 		struct ServiceReport Report;
-		DataCenter* DC;	
+		DataCenter* DC;
+		ProviderDirectoryHandler* pd_handler_;	
 };
 
 

@@ -1,4 +1,6 @@
-#include "pd:rp.h"
+// Copyright (c) 2018 Yiming Lin
+
+#include "pdrp.h"
 
 FObj :: FObj() {}
 
@@ -102,6 +104,46 @@ FObjService :: FObjService(const FObjService& service) {
         strcpy(comment_, service.comment_);
     } else {
         comment_ = NULL;
+    }
+}
+
+
+FObjService :: FObjService(struct ServiceReport& service) {
+    date_ = new char[len2sz(LEN_DATE)];
+    strcpy(date_, service.DoS);
+
+    time_ = new char[len2sz(LEN_TIME)];
+    strcpy(time_, service.CDT);
+
+    char p_num[len2sz(LEN_PROVIDER_NUM)];
+    if(convertint2ch(service.ProviderNum, p_num)) {
+        provider_num_ = new char[len2sz(LEN_PROVIDER_NUM)];
+        strcpy(provider_num_, p_num);
+    } else {
+        provider_num_ = NULL;
+    }
+
+    char m_num[len2sz(LEN_MEMBER_NUM)];
+    if(convertint2ch(service.MemberNum, m_num)) {
+        member_num_ = new char[len2sz(LEN_MEMBER_NUM)];
+        strcpy(member_num_, m_num);
+    } else {
+        member_num_ = NULL;
+    }
+    
+    char s_code[len2sz(LEN_SERVICE_CODE)];
+    if(convertint2ch(service.ServiceCode, s_code)) {
+        service_code_ = new char[len2sz(LEN_SERVICE_CODE)];
+        strcpy(service_code_, s_code);
+    } else {
+        service_code_ = NULL;
+    }
+
+    if(strlen(service.Comments) == 0) {
+        comment_ = NULL;
+    } else {
+        comment_ = new char[len2sz(LEN_COMMENT)];
+        strcpy(comment_, service.Comments);
     }
 }
 
@@ -435,6 +477,30 @@ bool FObjMemberService :: Write(ofstream& out) const {
 }
 
 
+bool FObjMemberService :: FormattedWrite(ofstream& out) const {
+    char stddate[len2sz(LEN_DATE)];
+    
+    if(!out)
+        return false;
+
+    if(!Date :: getstdformat(stddate, date_))
+        return false;
+
+    out.setf(ios :: left);
+    out << "+----------+" << "------------------------------+" << endl;
+    out << "| Date     | " << setw(29) << stddate << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| Provider | " << setw(29) << provider_name_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << "| Service  | " << setw(29) << service_name_ << "|" << endl;
+    out << "+----------+------------------------------+" << endl;
+    out << endl;
+    out.unsetf(ios :: left);
+
+    return true;
+}
+
+
 void FObjMemberService :: Display() const {
     cout << endl << date_ << endl;
     cout << provider_name_ << endl;
@@ -454,26 +520,28 @@ FObjMemberService* FObjMemberService :: get_next() const {
 
 bool FObjMemberService :: get_info(DataCenter* dc, ProviderDirectoryLogging* pd) {
     char s_name[len2sz(LEN_SERVICE_NAME)];
-
-    // not implemented yet
-    // temp. assign data for testing
-    char temp_pn[] = "temp. provider name";
+    struct ProviderMember provider;
 
     if(!pd) {
-        cerr << "Cannot find provider directory information.\nMember service record exception. " << endl;
+        cerr << "Cannot find provider directory information." << endl;
+        return false;
+    }
+    if(!dc) {
+        cerr << "Cannot connect to the ChocAn Data Center." << endl;
         return false;
     }
 
     if(!pd -> SearchServiceName(time_, service_code_, s_name))
         strcpy(s_name, "Unknown");
+    try {
+		provider = dc -> getProvider(convertch2int(provider_num_));
+	} catch (std::exception &e) {
+        cerr << "Cannot fetch provider information whose ID number is " << provider_num_ << endl;
+		return false;
+	}
 
-    // temporary value for provider name
-    // char p_name[len2sz(LEN_PROVIDER_NAME)];
-    // dc -> get_provider_name(provider_num_, p_name);
-    // ------------------------- temp. value ------------------------------
-    provider_name_  = new char[len2sz(strlen(temp_pn))];
-    strcpy(provider_name_, temp_pn);
-    // --------------------------------------------------------------------
+    provider_name_  = new char[len2sz(LEN_PROVIDER_NAME)];
+    strcpy(provider_name_, provider.Name);
 
     service_name_ = new char[len2sz(strlen(s_name))];
     strcpy(service_name_, s_name);
@@ -495,7 +563,7 @@ FObjProviderService :: FObjProviderService() {
 
 
 FObjProviderService :: FObjProviderService(const FObjService& service)
-    : FObjService(service), member_name_(NULL), fee_(0.0), next_(NULL)
+    : FObjService(service), next_(NULL), member_name_(NULL), fee_(0.0)
 {
 }
 
@@ -621,6 +689,37 @@ bool FObjProviderService :: Write(ofstream& out) const {
 }
 
 
+bool FObjProviderService :: FormattedWrite(ofstream& out) const {
+    char stddate[len2sz(LEN_DATE)];
+    char stdtime[len2sz(LEN_TIME)];
+    
+    if(!out)
+        return false;
+
+    if(!Date :: getstdformat(stddate, date_) || !Time :: getstdformat(stdtime, time_))
+        return false;
+
+    out.setf(ios :: left);
+    out << "+---------------+" << "------------------------------+" << endl;
+    out << "| Date          | " << setw(29) << stddate << "|" << endl;
+    out << "+---------------+------------------------------+" << endl;
+    out << "| Time          | " << setw(29) << stdtime << "|" << endl;
+    out << "+---------------+------------------------------+" << endl;
+    out << "| Member name   | " << setw(29) << member_name_ << "|" << endl;
+    out << "+---------------+------------------------------+" << endl;
+    out << "| Member number | " << setw(29) << member_num_ << "|" << endl;
+    out << "+---------------+------------------------------+" << endl;
+    out << "| Service code  | " << setw(29) << service_code_ << "|" << endl;
+    out << "+---------------+------------------------------+" << endl;
+    out << "| Service fee   | " <<  "$" << setw(28) << fee_ << "|" << endl;
+    out << "+---------------+------------------------------+" << endl;
+    out << endl;
+    out.unsetf(ios :: left);
+
+    return true;
+}
+
+
 void FObjProviderService :: Display() const {
     cout << endl << date_ << endl;
     cout << time_ << endl;
@@ -632,24 +731,28 @@ void FObjProviderService :: Display() const {
 
 
 bool FObjProviderService :: get_info(DataCenter* dc, ProviderDirectoryLogging* pd) {
-    //not implemented yet
-    //temp. val used to test
-    char temp_mn[] = "temp. member name";
+    struct ProviderMember member;
 
     if(!pd) {
-        cerr << "Cannot find provider directory information.\nMember service record exception. " << endl;
+        cerr << "Cannot find provider directory information." << endl;
+        return false;
+    }
+    if(!dc) {
+        cerr << "Cannot connect to the ChocAn Data Center." << endl;
         return false;
     }
 
+    try {
+		member = dc -> getMember(convertch2int(member_num_));
+	} catch (std::exception &e) {
+        cerr << "Cannot fetch member information whose ID number is " << provider_num_ << endl;
+		return false;
+	}
+
     fee_ = pd -> SerachFee(time_, service_code_);
     
-    // temporary value for member name
-    // char m_name[len2sz(LEN_PROVIDER_NAME)];
-    // dc -> get_member_name(member_num_, m_name);
-    // --------------------------- temp. value ---------------------------
-    member_name_ = new char[len2sz(strlen(temp_mn))];
-    strcpy(member_name_, temp_mn);
-    // -------------------------------------------------------------------
+    member_name_ = new char[len2sz(LEN_MEMBER_NAME)];
+    strcpy(member_name_, member.Name);
 
     return true;
 }
@@ -808,8 +911,14 @@ bool FObjMemberReport :: Write(ofstream& out) const {
     if(!out)
         return false;
 
-    if(!member_ -> Provider :: Write(out))
+    out << "+-----------------------------------------+" << endl;
+    out << "|          Personal Information           |" << endl;
+
+    if(!member_ -> Provider :: FormattedWrite(out))
         return false;
+    
+    out << "+-----------------------------------------+" << endl;
+    out << "|      Received Services this week        |" << endl;
     return WriteService(list_entry_, out);
 }
 
@@ -819,9 +928,9 @@ bool FObjMemberReport :: WriteService(const FObjMemberService* phead, ofstream& 
         return false;
 
     if(!phead -> get_next())
-        return phead -> Write(out);
+        return phead -> FormattedWrite(out);
     
-    phead -> Write(out);
+    phead -> FormattedWrite(out);
     return WriteService(phead -> get_next(), out);
 }
 
@@ -1040,6 +1149,50 @@ bool FObjProviderReportSummary :: Write(ofstream& out) const {
 }
 
 
+bool FObjProviderReportSummary :: FormattedWrite(ofstream& out) const {
+    if(!out)
+        return false;
+    
+    if(!provider_ -> FormattedWrite(out))
+        return false;
+
+    out.setf(ios :: left);
+    out << endl << endl;
+    out << "+----------------------------------------------+" << endl;
+    out << "|           Summary of this week               |" << endl;
+    out << "+---------------+------------------------------+" << endl;
+    out << "| Consultation# | " << setw(29) << consultation_num_ << "|" << endl;
+    out << "+---------------+------------------------------+" << endl;
+    out << "| Total fee     | " << "$" << setw(28) << fee_ << "|" << endl;
+    out << "+---------------+------------------------------+" << endl; 
+    out << endl << endl;
+    out << "+----------------------------------------------+" << endl;
+    out << "|        Services provided in this week        |" << endl;
+    out.unsetf(ios :: left);
+
+    return true;
+}
+
+
+bool FObjProviderReportSummary :: FormattedWriteForManager(ofstream& out) const {
+    if(!out)
+        return false;
+
+    out.setf(ios :: left);
+    out << "+----------------+----------------------------------+" << endl;
+    out << "| " << setw(14) << provider_ -> get_number() << " | " << setw(33) << provider_ -> get_name() << "|" << endl;
+    out << "+----------------+----------------------------------+" << endl;
+    out << "| Consultation#  | " << setw(33) << consultation_num_ << "|" << endl;
+    out << "+----------------+----------------------------------+" << endl;
+    out << "| Total fee      | " << "$" << setw(32) << fee_ << "|" << endl;
+    out << "+----------------+----------------------------------+" << endl;
+    out << endl;
+    out.unsetf(ios :: left);
+
+    return true;
+}
+
+
 void FObjProviderReportSummary :: Display() const {
     if(provider_)
         provider_ -> Display();
@@ -1059,6 +1212,22 @@ int FObjProviderReportSummary :: get_consultation_num() const {
 float FObjProviderReportSummary :: get_fee() const {
     return fee_;
 }
+
+
+bool FObjProviderReportSummary :: GenerateFileName(char* receiver) const {
+    if(!provider_ || !report_date_)
+        return false;
+    if(!provider_ -> get_name())
+        return false;
+
+    strcpy(receiver, provider_ -> get_name());
+    strcat(receiver, "_");
+    strcat(receiver, report_date_);
+    strcat(receiver, "_summary.txt");
+
+    return true;
+}
+
 
 
 FObjProviderReport :: FObjProviderReport() {
@@ -1153,7 +1322,7 @@ bool FObjProviderReport :: Write(ofstream& out) const {
     if(!out)
         return false;
     
-    if(!FObjProviderReportSummary :: Write(out))
+    if(!FObjProviderReportSummary :: FormattedWrite(out))
         return false;
     
     return WriteService(list_entry_, out);
@@ -1167,7 +1336,7 @@ bool FObjProviderReport :: WriteService(FObjProviderService* phead, ofstream& ou
     if(!phead)
         return true;
     
-    phead -> Write(out);
+    phead -> FormattedWrite(out);
     return WriteService(phead -> get_next(), out);
 }
 
@@ -1391,12 +1560,24 @@ bool FObjManagerReport :: Read(ifstream& in) {
 bool FObjManagerReport :: Write(ofstream& out) const {
     if(!out)
         return false;
-    
-    out << provider_num_ << endl;
-    out << sum_consultation_ << endl;
-    out << fee_ << endl;
+
+    out.setf(ios :: left);
+    out << "+---------------------------------------------------+" << endl;
+    out << "|           Manager Payable Weekly Report           |" << endl;
+    out << "+----------------------+----------------------------+" << endl;
+    out << "| Provider number      | " << setw(27) << provider_num_ << "|" << endl;
+    out << "+----------------------+----------------------------+" << endl;
+    out << "| Total consultation#  | " << setw(27) << sum_consultation_ << "|" << endl;
+    out << "+----------------------+----------------------------+" << endl;
+    out << "| Total fee            | " << "$"<< setw(26) << fee_ << "|" << endl;
+    out << "+----------------------+----------------------------+" << endl;
+    out << endl;
+    out << "+---------------------------------------------------+" << endl;
+    out << "|             Details for Each Provider             |" << endl;
+    out.unsetf(ios :: left);
+
     for(int i = 0; i < provider_num_; ++i) 
-        (provider_report_ + i) -> Write(out);
+        (provider_report_ + i) -> FormattedWriteForManager(out);
 
     return true;
 }
@@ -1448,16 +1629,16 @@ FObjEFT :: FObjEFT(FObjProviderReportSummary& summary)
 
 
 FObjEFT :: FObjEFT(const FObjEFT& eft) : FObjProviderReportSummary(eft) {
-    if((eft.provider_) -> get_number()) {
+    if(eft.provider_num_) {
         provider_num_ = new char[len2sz(LEN_PROVIDER_NUM)];
-        strcpy(provider_num_, (eft.provider_) -> get_number());
+        strcpy(provider_num_, eft.provider_num_);
     } else {
         provider_num_ = NULL;
     }
     
-    if((eft.provider_) -> get_name()) {
+    if(eft.provider_name_) {
         provider_name_ = new char[len2sz(LEN_PROVIDER_NAME)];
-        strcpy(provider_name_, (eft.provider_) -> get_name());
+        strcpy(provider_name_, eft.provider_name_);
     } else {
         provider_name_ = NULL;
     }
@@ -1490,19 +1671,21 @@ FObjEFT& FObjEFT :: operator=(const FObjEFT& eft) {
 
     Erase();
 
-    if((eft.provider_) -> get_number()) {
+    if(eft.provider_num_) {
         provider_num_ = new char[len2sz(LEN_PROVIDER_NUM)];
-        strcpy(provider_num_, (eft.provider_) -> get_number());
+        strcpy(provider_num_, eft.provider_num_);
     } else {
         provider_num_ = NULL;
     }
     
-    if((eft.provider_) -> get_name()) {
+    if(eft.provider_name_) {
         provider_name_ = new char[len2sz(LEN_PROVIDER_NAME)];
-        strcpy(provider_name_, (eft.provider_) -> get_name());
+        strcpy(provider_name_, eft.provider_name_);
     } else {
         provider_name_ = NULL;
     }
+
+    fee_ = eft.fee_;
 
     return *this;
 }
@@ -1532,6 +1715,9 @@ bool FObjEFT :: Read(ifstream& in) {
         strcpy(provider_num_, p_num);
     }
 
+    in >> fee_;
+    in.ignore(1000, '\n');
+
     return true;
 }
 
@@ -1543,6 +1729,25 @@ bool FObjEFT :: Write(ofstream& out) const {
     out << provider_name_ << endl;
     out << provider_num_ << endl;
     out << fee_ << endl;
+
+    return true;
+}
+
+
+bool FObjEFT :: FormattedWrite(ofstream& out) const {
+    if(!out)
+        return false;
+    
+    out.setf(ios :: left);
+    out << "+-----------------+-------------------------------+" << endl;
+    out << "| Provider name   | " << setw(30) << provider_name_ << "|" << endl;
+    out << "+-----------------+-------------------------------+" << endl;
+    out << "| Provider number | " << setw(30) << provider_num_ << "|" << endl;;
+    out << "+-----------------+-------------------------------+" << endl;
+    out << "| Fee             | " << "$" << setw(29) << fee_ << "|" << endl;
+    out << "+-----------------+--------------------------------" << endl;
+    out << endl;
+    out.unsetf(ios :: left);
 
     return true;
 }
@@ -1563,6 +1768,101 @@ bool FObjEFT :: GenerateFileName(char* receiver) const {
     strcat(receiver, "_");
     strcat(receiver, provider_num_);
     strcat(receiver, "_EFT.txt");
+    return true;
+}
+
+
+FObjEftReport :: FObjEftReport() {
+    report_date_ = NULL;
+    eft_record_ = NULL;
+    size_ = 0;
+    eft_num_ = 0;
+}
+
+
+FObjEftReport :: FObjEftReport(char* dt) {
+    if(dt) {
+        report_date_ = new char[len2sz(strlen(dt))];
+        strcpy(report_date_, dt);
+    } else {
+        report_date_ = NULL;
+    }
+
+    size_ = MAX_CDC_ENTRIES;
+    eft_record_ = new FObjEFT[size_];
+
+    eft_num_ = 0;
+}
+
+
+FObjEftReport :: ~FObjEftReport() {
+    if(report_date_) {
+        delete [] report_date_;
+        report_date_ = NULL;
+    }
+
+    if(eft_record_) {
+        delete [] eft_record_;
+        eft_record_ = NULL;
+    } 
+}
+
+
+bool FObjEftReport :: Read(ifstream& in) {
+    cerr << "Trying to access EFT report. Process killed..." << endl;
+    exit(1);
+}
+
+
+bool FObjEftReport :: Write(ofstream& out) const {
+    if(!out)
+        return false;
+    
+    if(!eft_record_ || !eft_num_) {
+        cerr << "No EFT files in the system currently" << endl;
+        return false;
+    }
+    
+    out << "+-------------------------------------------------+" << endl;
+    out << "|     ChocAn Electronic Funds Transfer Report     |" << endl;
+    out << "+-------------------------------------------------+" << endl;
+    out << endl;
+
+    for(int i = 0; i < eft_num_; ++i)
+        eft_record_[i].FormattedWrite(out);
+
+    return true;
+}
+
+
+void FObjEftReport :: Display() const {
+    if(eft_num_) {
+        for(int i = 0; i < eft_num_; ++i) 
+            eft_record_[i].Display();
+    }
+}
+
+
+bool FObjEftReport :: GenerateFileName(char* receiver) const {
+    if(!report_date_)
+        return false;
+    
+    strcpy(receiver, report_date_);
+    strcat(receiver, "_EFT_report.txt");
+    return true;
+}
+
+
+bool FObjEftReport :: InsertEftRecord(const FObjEFT& item) {
+    if(eft_num_ >= size_)
+        return false;
+    
+    if(!eft_record_) {
+        eft_record_ = new FObjEFT[MAX_CDC_ENTRIES];
+        eft_num_ = 0;
+    }
+    eft_record_[eft_num_++] = item;
+    
     return true;
 }
 
@@ -1683,6 +1983,34 @@ int CdcMemberEntries :: get_entries(Member* receiver) const {
 }
 
 
+int CdcMemberEntries :: GetMemberProviderStruct(struct ProviderMember* receiver, int sz) const {
+    int num = 0;
+    int index = 0;
+
+    if(sz > size_)
+        num = size_;
+    else 
+        num = sz;
+        
+    for(int i = 0; i < num; ++i) {
+        index += entry_array_[i].GetProviderMemberStruct(receiver[index]);
+    }
+
+    return index;
+}
+
+
+void CdcMemberEntries :: PackageCdcEntries(struct ProviderMember& entry) {
+    if(!entry_array_) {
+        entry_array_ = new Member[MAX_CDC_ENTRIES];
+        size_ = 0;
+    }
+    
+    Member member(entry);
+    entry_array_[size_++] = member;
+}
+
+
 CdcProviderEntries :: CdcProviderEntries() {
     size_ = 0;
     entry_array_ = NULL;
@@ -1796,6 +2124,34 @@ int CdcProviderEntries :: get_entries(Provider* receiver) const {
     } else {
         return 0;
     }
+}
+
+
+int CdcProviderEntries :: GetMemberProviderStruct(struct ProviderMember* receiver, int sz) const {
+    int num = 0;
+    int index = 0;
+
+    if(sz > size_)
+        num = size_;
+    else 
+        num = sz;
+        
+    for(int i = 0; i < num; ++i) {
+        index += entry_array_[i].GetProviderMemberStruct(receiver[index]);
+    }
+
+    return index;
+}
+
+
+void CdcProviderEntries :: PackageCdcEntries(struct ProviderMember& entry) {
+    if(!entry_array_) {
+        entry_array_ = new Provider[MAX_CDC_ENTRIES];
+        size_ = 0;
+    }
+    
+    Provider provider(entry);
+    entry_array_[size_++] = provider;
 }
 
 
@@ -2381,7 +2737,6 @@ int FileManager :: TraverseDirectory(const char* pathname, int mode) {
     dirent* dir;
     DIR* d;
     int ret;
-    int arglen;
     char* subdir;
 
     if(!pathname || lstat(pathname, &statbuf) < 0 || S_ISDIR(statbuf.st_mode) == 0)
@@ -2394,6 +2749,8 @@ int FileManager :: TraverseDirectory(const char* pathname, int mode) {
     while((dir = readdir(d)) != NULL) {
         if(strcmp(dir -> d_name, ".") == 0 || strcmp(dir -> d_name, "..") == 0 || 
             strcmp(dir -> d_name, ".DS_Store") == 0)
+            continue;
+        if(dir -> d_name[0] == '.')
             continue;
         if(dir -> d_type == DT_DIR) {
             subdir = new char[LEN_PATH_MAX];
@@ -2457,6 +2814,18 @@ int FileManager :: Write(const FObj* file) {
                             if(pd_entries) {
                                 if(WriteProviderDirectoryEntries(pd_entries) == 0)
                                     return 0;
+                            } else {
+                                const FObjProviderReportSummary* ps = dynamic_cast<const FObjProviderReportSummary*>(file);
+                                if(ps) {
+                                    if(WriteProviderReportSummary(ps) == 0)
+                                        return 0;
+                                } else {
+                                    const FObjEftReport* eft_report = dynamic_cast<const FObjEftReport*>(file);
+                                    if(eft_report) {
+                                        if(WriteEftReport(eft_report) == 0)
+                                            return 0;
+                                    }
+                                }
                             }
                         }
                     }
@@ -2486,7 +2855,6 @@ int FileManager :: WriteService(const FObjService* service) {
 
     Directory* d = new Directory(path, dt);
     service_record_head_ = WriteService(service_record_head_, d, service);
-    delete d;
 
     return 1;
 }
@@ -2547,6 +2915,8 @@ Directory* FileManager :: WriteService(Directory* phead, Directory* item, const 
         out.open(filepath);
         service -> Write(out);
         out.close();
+	delete item;
+	item = NULL;
         return phead;
     } else {
         Directory* after_head_ptr = WriteService(phead -> get_link1(), item, service);
@@ -2716,6 +3086,29 @@ Directory* FileManager :: WriteProviderReport(Directory* proot, Directory* item,
 }
 
 
+int FileManager :: WriteProviderReportSummary(const FObjProviderReportSummary* summary) {
+    char filepath[LEN_PATH_MAX];
+    char filename[200];
+    int ret;
+    ofstream out;
+
+    if(!summary)
+        return 0;
+    if(!summary -> GenerateFileName(filename))
+            return 0;
+    
+    strcpy(filepath, current_working_directory_);
+    strcat(filepath, "/report/manager/sysdata/");
+    strcat(filepath, filename);
+    
+    out.open(filepath);
+    ret = summary -> Write(out);
+    out.close();
+    
+    return ret;
+}
+
+
 int FileManager :: WriteEft(const FObjEFT* eft) {
     int ret;
     char filepath[LEN_PATH_MAX];
@@ -2735,6 +3128,32 @@ int FileManager :: WriteEft(const FObjEFT* eft) {
     ret = eft -> Write(out);
     out.close();
     
+    return ret;
+}
+
+
+int FileManager :: WriteEftReport(const FObjEftReport* report) {
+    int ret;
+    char filepath[LEN_PATH_MAX];
+    char filename[LEN_PATH_MAX];
+    ofstream out;
+
+    if(!report)
+        return 0;
+
+    if(!report -> GenerateFileName(filename))
+        return 0;
+
+    strcpy(filepath, current_working_directory_);
+    strcat(filepath, "/report/EFT/");
+    strcat(filepath, filename);
+
+    out.open(filepath);
+    ret = report -> Write(out);
+    out.close();
+
+    cout << "EFT report has saved to:  " << filepath << endl; 
+
     return ret;
 }
 
@@ -2781,12 +3200,15 @@ int FileManager :: WriteCdcMemberEntries(const CdcMemberEntries* entries) {
     ret = entries -> Write(out);
     out.close();
 
+    if(ret)
+        cout << "The ChocAn member entries are saved into: " << filepath << endl;
+
     return ret;
 }
 
 
 int FileManager :: WriteCdcProviderEntries(const CdcProviderEntries* entries) {
-    char filename[] = "provider_entires.txt";
+    char filename[] = "provider_entries.txt";
     char filepath[LEN_PATH_MAX];
     int ret;
     ofstream out;
@@ -2801,6 +3223,9 @@ int FileManager :: WriteCdcProviderEntries(const CdcProviderEntries* entries) {
     out.open(filepath);
     ret = entries -> Write(out);
     out.close();
+
+    if(ret)
+        cout << "The ChocAn provider entries are saved into: " << filepath << endl;
 
     return ret;
 }
@@ -2857,6 +3282,8 @@ int FileManager :: Read(HashNode* receiver) {
         if(strcmp(dir -> d_name, ".") == 0 || strcmp(dir -> d_name, "..") == 0 || 
                     strcmp(dir -> d_name, ".DS_Store") == 0)
             continue;
+        if(dir -> d_name[0] == '.')
+            continue;
         if(dir -> d_type == DT_REG) {
             if(!ParseProviderDirectoryTime(tm, dir -> d_name))
                 return 0;
@@ -2880,7 +3307,7 @@ int FileManager :: Read(HashNode* receiver) {
 
     closedir(d);
 
-    return found;
+    return ret;
 }
 
 
@@ -2911,6 +3338,8 @@ int FileManager :: Read(HashNode* receiver, const char* curr_tm) {
     while((dir = readdir(d)) != NULL) {
         if(strcmp(dir -> d_name, ".") == 0 || strcmp(dir -> d_name, "..") == 0 || 
                     strcmp(dir -> d_name, ".DS_Store") == 0)
+            continue;
+        if(dir -> d_name[0] == '.')
             continue;
         if(dir -> d_type == DT_REG) {
             if(!ParseProviderDirectoryTime(tm, dir -> d_name))
@@ -2968,6 +3397,8 @@ int FileManager :: Read(class HashNode* receiver, char* t_min, char* t_max) {
     while((dir = readdir(d)) != NULL) {
         if(strcmp(dir -> d_name, ".") == 0 || strcmp(dir -> d_name, "..") == 0 || 
                     strcmp(dir -> d_name, ".DS_Store") == 0)
+            continue;
+        if(dir -> d_name[0] == '.')
             continue;
         if(dir -> d_type == DT_REG) {
             if(!ParseProviderDirectoryTime(tm, dir -> d_name))
@@ -3053,6 +3484,8 @@ int FileManager :: Read(FObjService* receiver, char* d_min, char* d_max) {
     ifstream in;
     int ret;
     
+    if(!service_record_head_ || !service_record_tail_)
+        return -1;
     if(Date :: dtcmp(d_max, service_record_tail_ -> get_name()) < 0)
         return 0;
     if(Date :: dtcmp(d_min, service_record_head_ -> get_name()) > 0)
@@ -3072,6 +3505,8 @@ int FileManager :: Read(FObjService* receiver, char* d_min, char* d_max) {
                 if(strcmp(dir -> d_name, ".") == 0 || strcmp(dir -> d_name, "..") == 0 || 
                     strcmp(dir -> d_name, ".DS_Store") == 0)
                     continue;
+                if(dir -> d_name[0] == '.')
+                    continue;
                 if(dir -> d_type == DT_REG) {
                     strcpy(filepath, pathname);
                     strcat(filepath, "/");
@@ -3081,6 +3516,7 @@ int FileManager :: Read(FObjService* receiver, char* d_min, char* d_max) {
                     in.close();
                 }
             }
+	    closedir(d);
             curr = curr -> get_link1(); 
         } else {
             curr = NULL;
@@ -3091,53 +3527,82 @@ int FileManager :: Read(FObjService* receiver, char* d_min, char* d_max) {
 
  
 int FileManager :: Read(FObjProviderReportSummary* receiver, char* d_min, char* d_max) {
-    int ret = 0;
-    int count;
-
-    if(!provider_report_)
-        return 0;
-    Read(provider_report_, receiver, ret, d_min, d_max);
-    return ret;
-}
-
-
-void FileManager :: Read(Directory* proot, FObjProviderReportSummary* receiver, int& index, char* d_min, char* d_max) {
+    int count = 0;
     char filepath[LEN_PATH_MAX];
     char dt[len2sz(LEN_DATE)];
-    char* pathname;
+    char pathname[LEN_PATH_MAX];
     dirent* dir;
     DIR* d;
     struct stat statbuf; 
     ifstream in;
 
-    if(!proot)
-        return ;
-    
-    pathname = proot -> get_path();
-    if(!pathname || lstat(pathname, &statbuf) < 0 || S_ISDIR(statbuf.st_mode) == 0)
-        return ;
+    strcpy(pathname, current_working_directory_);
+    strcat(pathname, "/report/manager/sysdata");
+    if(lstat(pathname, &statbuf) < 0 || S_ISDIR(statbuf.st_mode) == 0)
+        return 0;
     if((d = opendir(pathname)) == NULL) 
-        return ; 
+        return 0; 
     while((dir = readdir(d)) != NULL) {
         if(strcmp(dir -> d_name, ".") == 0 || strcmp(dir -> d_name, "..") == 0 || 
             strcmp(dir -> d_name, ".DS_Store") == 0)
-                continue;
+            continue;
+        if(dir -> d_name[0] == '.')
+            continue;
         if(dir -> d_type == DT_REG) {
-            if(!ParseProviderReportDate(dt, dir -> d_name))
-                return ;
+            if(!ParseProviderReportSummaryDate(dt, dir -> d_name))
+                return 0;
             if(Date :: dtcmp(dt, d_max) <= 0 && Date :: dtcmp(dt, d_min) >= 0) {
                 strcpy(filepath, pathname);
                 strcat(filepath, "/");
                 strcat(filepath, dir -> d_name);
                 in.open(filepath);
-                index += receiver[index].Read(in);
+                count += receiver[count].Read(in);
+                in.close();
+            }
+        } 
+    } 
+    closedir(d);
+    return count;
+}
+
+
+int FileManager :: Read(FObjEFT* receiver, char* d_min, char* d_max) {
+    char filepath[LEN_PATH_MAX];
+    char dt[len2sz(LEN_DATE)];
+    char pathname[LEN_PATH_MAX];
+    dirent* dir;
+    DIR* d;
+    struct stat statbuf; 
+    ifstream in;
+    int ret = 0;
+
+    strcpy(pathname, current_working_directory_);
+    strcat(pathname, "/eft_record");
+    if(lstat(pathname, &statbuf) < 0 || S_ISDIR(statbuf.st_mode) == 0)
+        return 0;
+    if((d = opendir(pathname)) == NULL) 
+        return 0;
+    while((dir = readdir(d)) != NULL) {
+        if(strcmp(dir -> d_name, ".") == 0 || strcmp(dir -> d_name, "..") == 0 || 
+            strcmp(dir -> d_name, ".DS_Store") == 0)
+                continue;
+        if(dir -> d_name[0] == '.')
+            continue;
+        if(dir -> d_type == DT_REG) {
+            if(!ParseEftDate(dt, dir -> d_name))
+                return 0;
+            if(Date :: dtcmp(dt, d_min) >= 0 && Date :: dtcmp(dt, d_max) <= 0) {
+                strcpy(filepath, pathname);
+                strcat(filepath, "/");
+                strcat(filepath, dir -> d_name);
+                in.open(filepath);
+                ret += receiver[ret].Read(in);
                 in.close();
             }
         }
-    }    
-
-    Read(proot -> get_link1(), receiver, index, d_min, d_max);
-    Read(proot -> get_link2(), receiver, index, d_min, d_max);
+    } 
+    closedir(d);
+    return ret;
 }
 
 
@@ -3163,40 +3628,24 @@ bool FileManager :: ParseProviderReportDate(char* receiver, const char* filename
 }
 
 
-int FileManager :: Read(FObjEFT* receiver, char* d_min, char* d_max) {
-    char filepath[LEN_PATH_MAX];
-    char dt[len2sz(LEN_DATE)];
-    char pathname[LEN_PATH_MAX];
-    dirent* dir;
-    DIR* d;
-    struct stat statbuf; 
-    ifstream in;
-    int ret = 0;
+bool FileManager :: ParseProviderReportSummaryDate(char* receiver, const char* filename) {
+    int len;
+    int count = 9;
+    char tmp[len2sz(LEN_DATE)];
 
-    strcpy(pathname, current_working_directory_);
-    strcat(pathname, "/eft_record");
-    if(lstat(pathname, &statbuf) < 0 || S_ISDIR(statbuf.st_mode) == 0)
-        return 0;
-    if((d = opendir(pathname)) == NULL) 
-        return 0;
-    while((dir = readdir(d)) != NULL) {
-        if(strcmp(dir -> d_name, ".") == 0 || strcmp(dir -> d_name, "..") == 0 || 
-            strcmp(dir -> d_name, ".DS_Store") == 0)
-                continue;
-        if(dir -> d_type == DT_REG) {
-            if(!ParseEftDate(dt, dir -> d_name))
-                return 0;
-            if(Date :: dtcmp(dt, d_min) >= 0 && Date :: dtcmp(dt, d_max) <= 0) {
-                strcpy(filepath, pathname);
-                strcat(filepath, "/");
-                strcat(filepath, dir -> d_name);
-                in.open(filepath);
-                ret += receiver[ret].Read(in);
-                in.close();
-            }
-        }
-    }    
-    return ret;
+    if(!filename)
+        return false;
+    if((len = strlen(filename)) < 23)
+        return false;
+    for(int i = len - 13; i > len - 23; --i) {
+        tmp[count--] = filename[i];
+    }
+    if(count == -1) {
+        tmp[LEN_DATE] = '\0';
+        strcpy(receiver, tmp);
+        return true;
+    }
+    return false;
 }
 
 
@@ -3213,8 +3662,6 @@ bool FileManager :: ParseEftDate(char* receiver, const char* filename) {
 
 
 bool FileManager :: ParseProviderDirectoryTime(char* receiver, const char* filename) const {
-    char tm[len2sz(LEN_TIME)];
-
     if(!filename || strlen(filename) != LEN_PD_FILE)    
         return false;
     
@@ -3227,20 +3674,25 @@ bool FileManager :: ParseProviderDirectoryTime(char* receiver, const char* filen
 
 bool FileManager :: CheckDirectory() {
     const char* file_classes[] = {
-    "service_record",
-    "report",
-    "cdc_record",
-    "eft_record",
-    "provider_directory"
+        "service_record",
+        "report",
+        "cdc_record",
+        "eft_record",
+        "provider_directory"
     };
 
     const char* report_classes[] = {
-    "member",
-    "provider",
-    "manager",     
+        "member",
+        "provider",
+        "manager",     
+        "EFT"
     };
 
-    bool folder_good[5] = {
+    const char* manager_report[] = {
+        "sysdata"
+    };
+
+    bool folder_good[] = {
         false,
         false,
         false,
@@ -3248,17 +3700,22 @@ bool FileManager :: CheckDirectory() {
         false
     };
 
-    bool report_folder_good[3] = {
+    bool report_folder_good[] = {
         false,
         false,
+        false,
+        false
+    };
+
+    bool manager_report_folder_good[] = {
         false
     };
 
     dirent* dir;
     DIR* d;
     struct stat statbuf;
-    int index = 0;
     char reportpath[LEN_PATH_MAX];
+    char managerboxpath[LEN_PATH_MAX];
     bool folder_ok = true;
 
     cout << "Directories Detection" << endl;
@@ -3308,7 +3765,6 @@ bool FileManager :: CheckDirectory() {
             folder_ok = false;
         }
             
-    
     if(folder_good[1]) {
         strcpy(reportpath, current_working_directory_);
         strcat(reportpath, "/report/");
@@ -3335,16 +3791,50 @@ bool FileManager :: CheckDirectory() {
                     cout << reportpath << dir -> d_name << "   OK" << endl;
                     report_folder_good[2] = true;
                 }
+                if(strcmp(dir -> d_name, report_classes[3]) == 0) {
+                    cout << reportpath << dir -> d_name << "   OK" << endl;
+                    report_folder_good[3] = true;
+                }
             }
         }
 
         closedir(d);
 
-        for(int i = 0; i < 3; ++i)
+        for(int i = 0; i < 4; ++i)
             if(!report_folder_good[i]) {
-                cout << "Cannot find the path: " << reportpath << file_classes[i] << endl;
+                cout << "Cannot find the path: " << reportpath << report_classes[i] << endl;
                 folder_ok = false; 
             }
+
+        if(report_folder_good[2]) {
+            strcpy(managerboxpath, current_working_directory_);
+            strcat(managerboxpath, "/report/manager");
+            if(lstat(managerboxpath, &statbuf) < 0 || S_ISDIR(statbuf.st_mode) == 0) {
+                return false;
+            }
+            if((d = opendir(managerboxpath)) == NULL) {
+                return false;
+            }
+            while((dir = readdir(d)) != NULL) {
+                if(strcmp(dir -> d_name, ".") == 0 || strcmp(dir -> d_name, "..") == 0 || 
+                    strcmp(dir -> d_name, ".DS_Store") == 0) {
+                    continue;
+                }
+                if(dir -> d_type == DT_DIR) {
+                    if(strcmp(dir -> d_name, manager_report[0]) == 0) {
+                        cout << managerboxpath << "/" << dir -> d_name << "   OK" << endl;
+                        manager_report_folder_good[0] = true;
+                    }
+                }
+            } 
+
+            closedir(d);
+
+            if(!manager_report_folder_good[0]) {
+                cout << "Cannot find the path: " << managerboxpath << "/sysdata" << endl;
+                folder_ok = false; 
+            }
+        }
     }
 
     if(folder_ok) {
@@ -3353,7 +3843,7 @@ bool FileManager :: CheckDirectory() {
     } else {
         cout << "------------------------------------------------------------" << endl;
         cout << "Result: directories need to be initialized" << endl;
-        InitProcess(folder_good, report_folder_good);
+        InitProcess(folder_good, report_folder_good, manager_report_folder_good);
     }
 
     return true;
@@ -3361,28 +3851,32 @@ bool FileManager :: CheckDirectory() {
 
 
 
-void FileManager :: InitProcess(bool folder[], bool report_folder[]) {
+void FileManager :: InitProcess(bool folder[], bool report_folder[], bool manager_report_folder[]) {
     const char* file_classes[] = {
-    "/service_record",
-    "/report",
-    "/cdc_record",
-    "/eft_record",
-    "/provider_directory"
+        "/service_record",
+        "/report",
+        "/cdc_record",
+        "/eft_record",
+        "/provider_directory"
     };
 
     const char* report_classes[] = {
-    "/member",
-    "/provider",
-    "/manager",     
+        "/member",
+        "/provider",
+        "/manager",     
+        "/EFT"
+    };
+
+    const char* manager_report[] = {
+        "/sysdata"
     };
 
     char* path;
     char* new_dir;
     char* new_rpt_dir;
+    char* manager_box_dir;
     size_t sz = 256;
     struct stat s;
-    DIR* dir;
-    dirent* ret;
     int d_ret;
 
 
@@ -3413,7 +3907,7 @@ void FileManager :: InitProcess(bool folder[], bool report_folder[]) {
         }
     }
 
-    for(int j = DIR_member_rpt; j <= DIR_manager_rpt; ++j) {
+    for(int j = DIR_member_rpt; j <= DIR_eft_rpt; ++j) {
         if(!report_folder[j]) {
             new_rpt_dir = new char[strlen(path) + strlen(file_classes[DIR_report]) + strlen(report_classes[j]) + 1];
             strcpy(new_rpt_dir, path);
@@ -3429,7 +3923,258 @@ void FileManager :: InitProcess(bool folder[], bool report_folder[]) {
         }
     }
 
+    if(!manager_report_folder[0]) {
+        manager_box_dir = new char[LEN_PATH_MAX];
+        strcpy(manager_box_dir, path);
+        strcat(manager_box_dir, file_classes[DIR_report]);
+        strcat(manager_box_dir, report_classes[DIR_manager_rpt]);
+        strcat(manager_box_dir, manager_report[0]);
+        cout << "Create Directory: " << manager_box_dir << endl;
+        d_ret = mkdir(manager_box_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        if(d_ret == -1) {
+            cerr << "Make directory error!" << endl;
+            exit(1);
+        }
+        delete [] manager_box_dir;
+    }
+    
     cout << endl << "System initializaion done..." << endl;
 
     delete [] path;
+}
+
+
+DataCenter :: DataCenter() {
+    cerr << "File system is not enabled! Process killed..." << endl;
+    exit(1);
+}
+
+
+DataCenter :: DataCenter(FileManager* f_man) {
+    f_manager_ = f_man;
+    if(!ImportExternal()) {
+        //init();
+        cout << "No existed record currently" << endl;
+    }
+}
+
+
+DataCenter :: ~DataCenter() {
+    if(ExportExternal()) {
+        cout << "All Data Center records are saved successfully!" << endl;
+        cout << "ChocAn Data Center exit..." << endl;
+    } else {
+        cout << "Saving Data Center failed" << endl;
+        cout << "ChocAn Data Center exit..." << endl;
+    }
+}
+
+
+bool DataCenter :: ImportExternal() {
+    CdcProviderEntries* provider_package; 
+    CdcMemberEntries* member_package;
+    int converted_provider = 0;
+    int converted_member = 0;
+    int count = 0;
+
+    if(!f_manager_) {
+        cerr << "File system error! Process killed..." << endl;
+        exit(1);
+    }
+
+    cout << endl << endl << "ChocAn Data Center Initalization..." << endl;
+    cout << "---------------------------------------" << endl;
+
+    provider_package = new CdcProviderEntries();
+    member_package = new CdcMemberEntries();
+    if(!f_manager_ -> Read(provider_package) || !f_manager_ -> Read(member_package))
+        return false;
+
+    ProviderMember provider_entries[MAX_CDC_ENTRIES];
+    ProviderMember member_entries[MAX_CDC_ENTRIES];
+    
+    converted_member = member_package -> GetMemberProviderStruct(member_entries, MAX_CDC_ENTRIES);
+    converted_provider = provider_package -> GetMemberProviderStruct(provider_entries, MAX_CDC_ENTRIES);
+
+    for(int i = 0; i < converted_member; ++i) {
+        if(addMember(member_entries[i])) {
+            cout << "Member " << member_entries[i].IDNumber << " is imported into the system sucessfully" << endl;
+            ++count;
+        }
+    }
+    cout << count << " members are imported into the system." << endl << endl;
+
+    count = 0;
+    for(int i = 0; i < converted_provider; ++i) {
+        if(addProvider(provider_entries[i])) {
+            cout << "Provider " << provider_entries[i].IDNumber << " is imported into the system sucessfully" << endl;
+            ++count;
+        }
+    }
+    cout << count << " providers are imported into the system." << endl << endl;
+
+    cout << "---------------------------------------" << endl;
+    cout << "Initialization done..." << endl;
+
+    delete provider_package;
+    delete member_package;
+    return true;
+}
+
+
+bool DataCenter :: ExportExternal() {
+    CdcMemberEntries* member_package;
+    CdcProviderEntries* provider_package;
+    map<int, ProviderMember> :: iterator it_member;
+    map<int, ProviderMember> :: iterator it_provider;
+    bool ret = true;
+
+    if(!f_manager_) 
+        return false;
+
+    member_package = new CdcMemberEntries();
+    provider_package = new CdcProviderEntries();
+
+    it_member = members.begin();
+    while(it_member != members.end()) {
+        member_package -> PackageCdcEntries(it_member -> second);
+        it_member++;
+    }
+
+    it_provider = providers.begin();
+    while(it_provider != providers.end()) {
+        provider_package -> PackageCdcEntries(it_provider -> second);
+        it_provider++;
+    }
+
+    if(!f_manager_ -> Write(member_package) || !f_manager_ -> Write(provider_package))
+        ret = false;
+    
+    delete member_package;
+    delete provider_package;
+
+    return ret;
+}
+
+
+int DataCenter :: SavingServiceRecord() {
+    int count = 0;
+    deque<map<int, ServiceReport> > :: iterator iter;
+
+    if(services.empty()) {
+        cout << "No service is waiting for storing to disk." << endl;
+        return 0;
+    }
+
+    iter = services.begin();
+    while(iter != services.end()) {
+        map<int, ServiceReport> item = *iter;
+        map<int, ServiceReport> :: iterator it_service;
+        it_service = item.begin();
+        while(it_service != item.end()) {
+            FObjService* service = new FObjService(it_service -> second);
+            f_manager_ -> Write(service);
+            it_service++;
+            ++count;
+            delete service;
+        }
+        iter++;
+    }
+    
+    return count;
+}
+
+
+bool DataCenter :: SavingServiceRecord(struct ServiceReport& service) {
+    bool ret;
+    
+    if(!f_manager_) {
+        cerr << "File system error. Saving service record failed!" << endl;
+        return false;
+    }
+    
+
+    FObjService* service_record = new FObjService(service);
+    ret = f_manager_ -> Write(service_record);
+    delete service_record;
+
+    return ret;
+}
+
+
+int DataCenter :: ValidateMember(int num) {
+    struct ProviderMember person;
+
+    try {
+		person = getMember(num);
+        if(person.Status == 0)
+            return 0;
+        return 1;
+	} catch (std::exception &e) {
+		return -1;
+	}
+}
+
+
+int DataCenter :: ValidateProvider(int num) {
+    try {
+		getProvider(num);
+	} catch (std::exception &e) {
+		return -1;
+	}
+    return 1;
+}
+
+
+void DataCenter :: ManagerInterface() {
+    map<int, ProviderMember> :: iterator it_provider;
+    map<int, ProviderMember> :: iterator it_member;
+
+    cout.setf(ios :: left);
+    cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "|                                            Chocoholics Anonymous Data Center                                          |" << endl;
+    cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "| [Provider]       Name      |     ID    |          Address          |       City      | State | Zip Code |    Status   |" << endl;
+    cout << "+----------------------------+-----------+---------------------------+-----------------+-------+----------+-------------+" << endl;
+
+    it_provider = providers.begin();
+    while(it_provider != providers.end()) {
+        cout << "| " << setw(26) << (it_provider -> second).Name;
+        cout << " | " << setw(9) << (it_provider -> second).IDNumber;
+        cout << " | " << setw(25) << (it_provider -> second).StreetAddress;
+        cout << " | " << setw(15) << (it_provider -> second).City;
+        cout << " | " << setw(5) << (it_provider -> second).State;
+        cout << " | " << setw(8) << (it_provider -> second).ZipCode;
+        cout << " | " << "N/A         |" << endl;
+        it_provider++;
+    }
+
+    cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "| [Member]       Name        |     ID    |          Address          |       City      | State | Zip Code |    Status   |" << endl;
+    cout << "+----------------------------+-----------+---------------------------+-----------------+-------+----------+-------------+" << endl; 
+
+    it_member = members.begin();
+    while(it_member != members.end()) {
+        cout << "| " << setw(26) << (it_member -> second).Name;
+        cout << " | " << setw(9) << (it_member -> second).IDNumber;
+        cout << " | " << setw(25) << (it_member -> second).StreetAddress;
+        cout << " | " << setw(15) << (it_member -> second).City;
+        cout << " | " << setw(5) << (it_member -> second).State;
+        cout << " | " << setw(8) << (it_member -> second).ZipCode;
+        if((it_member -> second).Status == 1)
+            cout << " | " << "Validated   |" << endl;
+        else if((it_member -> second).Status == 0)
+            cout << " | " << "Suspended   |" << endl;
+        else 
+            cout << " | " << "Unknown     |" << endl;
+        it_member++;
+    }
+    cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "|[1] Insert |[2] Insert   |[3] Insert  |[4] Update  |[5] Update   |[6] Update  |[7] Remove |[8] Remove   |[9] Remove    |" << endl;
+    cout << "|    Member |    Provider |    Service |    Member  |    Provider |    Service |    Member |    Provider |    Service   |" << endl;
+    cout << "+-----------------------------------------------------------------------------------------------------------------------+" << endl;
+    cout << "|[10] Generate member |[11] Generate provider |[12] Generate manager |[13] Generate EFT |[14] Generate all types        |" << endl;
+    cout << "|     Report          |     Report            |     payable report   |     Report       |     of weekly report          |" << endl;
+    cout << "+---------------------+-----------------------+----------------------+------------------+-------------------------------+" << endl;
+    cout.unsetf(ios :: left);
 }

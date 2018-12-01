@@ -1,4 +1,4 @@
-# <your name>
+# Kathryn Silva
 # Nov. 30th 2018
 
 # Please tweak the following variable definitions as needed by your

@@ -2915,6 +2915,8 @@ Directory* FileManager :: WriteService(Directory* phead, Directory* item, const 
         out.open(filepath);
         service -> Write(out);
         out.close();
+	delete item;
+	item = NULL;
         return phead;
     } else {
         Directory* after_head_ptr = WriteService(phead -> get_link1(), item, service);
@@ -3514,6 +3516,7 @@ int FileManager :: Read(FObjService* receiver, char* d_min, char* d_max) {
                     in.close();
                 }
             }
+	    closedir(d);
             curr = curr -> get_link1(); 
         } else {
             curr = NULL;
@@ -3558,7 +3561,7 @@ int FileManager :: Read(FObjProviderReportSummary* receiver, char* d_min, char* 
             }
         } 
     } 
-
+    closedir(d);
     return count;
 }
 
@@ -3597,7 +3600,8 @@ int FileManager :: Read(FObjEFT* receiver, char* d_min, char* d_max) {
                 in.close();
             }
         }
-    }    
+    } 
+    closedir(d);
     return ret;
 }
 
